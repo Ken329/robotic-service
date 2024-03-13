@@ -1,0 +1,7 @@
+dist
+.env
+node_modules
+.vscode
+private-key.pem
+public-key.pem
+robotic-service.pem

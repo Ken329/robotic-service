@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - run: npm build
+      - run: npm run build
       - run: |
           touch .env
           echo "${{ secret.UAT_ENV_FILE }}" > .env

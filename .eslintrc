@@ -1,0 +1,21 @@
+{
+  "plugins": ["@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
+  "extends": ["plugin:prettier/recommended", "prettier", "eslint:recommended"],
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": "tsconfig.json"
+  },
+  "rules": {
+    "semi": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-multi-spaces": "error",
+    "space-in-parens": "error"
+  }
+}

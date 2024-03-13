@@ -25,4 +25,4 @@ jobs:
       - run: npm build
       - run: |
           touch .env
-          echo "${{ secret.UAT_ENV_FILE }}" > .env
+          echo "${{ secrets.UAT_ENV_FILE }}" > .env

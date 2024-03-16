@@ -1,18 +1,51 @@
 import { Request, Response } from 'express';
+import {
+  getPublicKey,
+  errorApiResponse,
+  successApiResponse
+} from '../utils/helpers';
+import Service from '../services/authService';
 
 const generatePublicKey = (req: Request, res: Response) => {
   try {
-    return res.status(200).json({ success: true, message: 'success' });
+    const publicKey = getPublicKey();
+    return successApiResponse(
+      res,
+      'Successfully generate public key',
+      'Auth Controller',
+      'Generate Public Key',
+      { publicKey }
+    );
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'failed' });
+    return errorApiResponse(
+      res,
+      'Failed generate public key',
+      'Auth Controller',
+      'Generate Public Key',
+      error.message
+    );
   }
 };
 
-// route.get('/generate-public-key', (req: Request, res: Response) => {
-//   res.send('Hello World with TypeScript!');
-// });
+const verifyUser = async (req: Request, res: Response) => {
+  try {
+    const data = await Service.verifyUser(req.body.email, req.body.password);
+    return successApiResponse(
+      res,
+      'Successfully verified user',
+      'Auth Controller',
+      'Verify User',
+      data
+    );
+  } catch (error) {
+    return errorApiResponse(
+      res,
+      'Failed to verify user',
+      'Auth Controller',
+      'Verify user',
+      error.message
+    );
+  }
+};
 
-export default { generatePublicKey };
-
-// ssh -i <PATH TO YOUR KEY PAIR FILE> ec2-user@<PUBLIC DNS OF YOUR INSTANCE>
-// scp -i "robotic-service.pem" -r ./ ec2-user@ec2-3-27-135-178.ap-southeast-2.compute.amazonaws.com:/home/ec2-user/app
+export default { generatePublicKey, verifyUser };

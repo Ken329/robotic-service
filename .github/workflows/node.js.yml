@@ -26,4 +26,8 @@ jobs:
       - run: |
           touch .env
           echo "${{ secrets.UAT_ENV_FILE }}" > .env
-      - run: pm2 restart BackendAPI
+          touch encryption-public-key.pem
+          echo "${{ secrets.UAT_PUBLIC_KEY }}" > encryption-public-key.pem
+          touch encryption-private-key.pem
+          echo "${{ secrets.UAT_PRIVATE_KEY }}" > encryption-private-key.pem
+      - run: npm run start

@@ -26,3 +26,4 @@ jobs:
           echo "${{ secrets.UAT_PUBLIC_KEY }}" > encryption-public-key.pem
           touch encryption-private-key.pem
           echo "${{ secrets.UAT_PRIVATE_KEY }}" > encryption-private-key.pem
+      - run: pm2 restart RoboticService

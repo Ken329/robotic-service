@@ -4,7 +4,6 @@ import {
   errorApiResponse,
   successApiResponse
 } from '../utils/helpers';
-import Service from '../services/authService';
 
 const generatePublicKey = (req: Request, res: Response) => {
   try {
@@ -27,25 +26,4 @@ const generatePublicKey = (req: Request, res: Response) => {
   }
 };
 
-const verifyUser = async (req: Request, res: Response) => {
-  try {
-    const data = await Service.verifyUser(req.body.email, req.body.password);
-    return successApiResponse(
-      res,
-      'Successfully verified user',
-      'Auth Controller',
-      'Verify User',
-      data
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to verify user',
-      'Auth Controller',
-      'Verify user',
-      error.message
-    );
-  }
-};
-
-export default { generatePublicKey, verifyUser };
+export default { generatePublicKey };

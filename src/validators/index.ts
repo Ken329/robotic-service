@@ -2,7 +2,7 @@ import { get, map } from 'lodash';
 import { AnyZodObject } from 'zod';
 import httpStatusCode from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
-import AuthValidators from './authValidators';
+import UserValidators from './userValidators';
 import { errorApiResponse } from '../utils/helpers';
 
 export const validate =
@@ -32,4 +32,4 @@ export const validate =
     }
   };
 
-export default AuthValidators;
+export default { UserValidators };

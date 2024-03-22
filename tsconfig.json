@@ -5,6 +5,8 @@
     "target": "ES2021", // which level of JS support to target
     "module": "CommonJS", // which system for the program AMD, UMD, System, CommonJS
     "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
 
     // Recommended: Compiler complains about expressions implicitly typed as 'any'
     "noImplicitAny": true

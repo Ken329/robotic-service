@@ -22,70 +22,35 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const aws_sdk_1 = __importDefault(require("aws-sdk"));
-const crypto_1 = __importDefault(require("crypto"));
 const dotenv = __importStar(require("dotenv"));
-const http_status_codes_1 = __importDefault(require("http-status-codes"));
-const helpers_1 = require("../utils/helpers");
+const amazon_cognito_identity_js_1 = require("amazon-cognito-identity-js");
 dotenv.config();
 class AwsCognitoService {
     constructor() {
-        this.config = {
-            apiVersion: '2024-03-16',
-            region: 'ap-southeast-2'
-        };
-        this.secretHash = process.env.COGNITO_CLIENT_SECRET;
-        this.clientId = process.env.COGNITO_CLIENT_ID;
-        this.cognitoIdentity = new aws_sdk_1.default.CognitoIdentityServiceProvider(this.config);
+        this.UserPool = new amazon_cognito_identity_js_1.CognitoUserPool({
+            UserPoolId: process.env.COGNITO_POOL_ID,
+            ClientId: process.env.COGNITO_CLIENT_ID
+        });
     }
-    async signUpUser(username, password, costCenter, role) {
-        try {
-            const data = await this.cognitoIdentity
-                .signUp({
-                ClientId: this.clientId,
-                Password: password,
-                Username: username,
-                SecretHash: this.hashSecret(username),
-                UserAttributes: [
-                    { Name: 'custom:center', Value: costCenter },
-                    { Name: 'custom:role', Value: role }
-                ]
-            })
-                .promise();
-            return data.UserSub;
-        }
-        catch (error) {
-            (0, helpers_1.throwErrorsHttp)(error.message, http_status_codes_1.default.BAD_REQUEST);
-        }
+    async signUp(email, password) {
+        return new Promise((resolve, reject) => {
+            this.UserPool.signUp(email, password, [], null, (err, result) => {
+                err
+                    ? reject({ message: err.message })
+                    : resolve({
+                        id: result.userSub,
+                        email: result.user.getUsername(),
+                        confirmation: result.userConfirmed
+                    });
+            });
+        });
     }
-    async confirmSignUp(username, code) {
-        const params = {
-            ClientId: this.clientId,
-            ConfirmationCode: code,
-            Username: username,
-            SecretHash: this.hashSecret(username)
-        };
-        try {
-            const cognitoResp = await this.cognitoIdentity
-                .confirmSignUp(params)
-                .promise();
-            console.log(cognitoResp);
-            return true;
-        }
-        catch (error) {
-            console.log('error', error);
-            return false;
-        }
-    }
-    hashSecret(username) {
-        return crypto_1.default
-            .createHmac('SHA256', this.secretHash)
-            .update(username + this.clientId)
-            .digest('base64');
+    async confirmedSignUp(email, code) {
+        const User = new amazon_cognito_identity_js_1.CognitoUser({ Username: email, Pool: this.UserPool });
+        return new Promise((resolve, reject) => {
+            User.confirmRegistration(code, true, (err, result) => err ? reject({ message: err.message }) : resolve(result));
+        });
     }
 }
 exports.default = new AwsCognitoService();

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate = void 0;
 const lodash_1 = require("lodash");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
-const authValidators_1 = __importDefault(require("./authValidators"));
+const userValidators_1 = __importDefault(require("./userValidators"));
 const helpers_1 = require("../utils/helpers");
 const validate = (schema) => async (req, res, next) => {
     try {
@@ -24,4 +24,4 @@ const validate = (schema) => async (req, res, next) => {
     }
 };
 exports.validate = validate;
-exports.default = authValidators_1.default;
+exports.default = { UserValidators: userValidators_1.default };

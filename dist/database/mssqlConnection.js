@@ -22,18 +22,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const auth_provider_1 = require("../providers/auth.provider");
-const validators_1 = __importStar(require("../validators"));
-const userController_1 = __importDefault(require("../controllers/userController"));
-const route = (0, express_1.default)();
-route.get('/api/user/:email', 
-// validate(Validators.confirmSignUp),
-userController_1.default.user);
-route.post('/api/user/sign-up', (0, auth_provider_1.authenticate)(auth_provider_1.AUTH_STRATEGY.PROSPECT), (0, validators_1.validate)(validators_1.default.UserValidators.signUp), userController_1.default.signUp);
-route.post('/api/user/confirm-sign-up', (0, auth_provider_1.authenticate)(auth_provider_1.AUTH_STRATEGY.PROSPECT), (0, validators_1.validate)(validators_1.default.UserValidators.confirmSignUp), userController_1.default.confirmSignUp);
-exports.default = route;
+const dotenv = __importStar(require("dotenv"));
+const lodash_1 = require("lodash");
+const sequelize_1 = require("sequelize");
+dotenv.config();
+const DB_CONNECTION = (0, lodash_1.defaultTo)(process.env.DB_CONNECTION, 'mssql');
+const DB_HOST = (0, lodash_1.defaultTo)(process.env.DB_HOST, 'localhost');
+const DB_PORT = (0, lodash_1.defaultTo)(process.env.DB_PORT, 1433);
+const DB_NAME = (0, lodash_1.defaultTo)(process.env.DB_NAME, 'robotic-service');
+const DB_USERNAME = (0, lodash_1.defaultTo)(process.env.DB_USERNAME, 'sa');
+const DB_PASSWORD = (0, lodash_1.defaultTo)(process.env.DB_PASSWORD, 'robotic-service');
+const sequelizeConnection = new sequelize_1.Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
+    host: DB_HOST,
+    port: DB_PORT,
+    dialect: DB_CONNECTION,
+    dialectOptions: {
+        options: {
+            encrypt: true
+        }
+    },
+    logging: false,
+    pool: {
+        max: 1,
+        min: 0,
+        idle: 10000
+    }
+});
+exports.default = sequelizeConnection;

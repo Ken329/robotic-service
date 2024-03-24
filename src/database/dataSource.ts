@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './entity/User';
+import { Center } from './entity/Center';
 
 dotenv.config();
 
@@ -14,9 +15,7 @@ const dbConnection = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User],
-  subscribers: [],
-  migrations: [],
+  entities: [Center, User],
   options: { encrypt: false }
 });
 

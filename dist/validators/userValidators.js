@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const zod_1 = require("zod");
-const constant_1 = require("../utils/constant");
 const signUp = zod_1.z.object({
     body: zod_1.z.object({
         email: zod_1.z
@@ -37,13 +36,11 @@ const signUp = zod_1.z.object({
         nationality: zod_1.z.string({
             required_error: 'Nationality is required'
         }),
-        center: zod_1.z.string({
+        center: zod_1.z
+            .string({
             required_error: 'Center is required'
-        }),
-        role: zod_1.z.enum([constant_1.ROLE.STUDENT, constant_1.ROLE.CENTER, constant_1.ROLE.ADMIN], {
-            required_error: 'Role is required',
-            invalid_type_error: 'Role is is not match'
         })
+            .uuid('Center is not a valid UUID')
     })
 });
 const confirmSignUp = zod_1.z.object({
@@ -58,4 +55,33 @@ const confirmSignUp = zod_1.z.object({
         })
     })
 });
-exports.default = { signUp, confirmSignUp };
+const adminCreation = zod_1.z.object({
+    body: zod_1.z.object({
+        email: zod_1.z
+            .string({
+            required_error: 'Email is required'
+        })
+            .email('Email is not valid'),
+        password: zod_1.z.string({
+            required_error: 'Password is required'
+        })
+    })
+});
+const centerCreation = zod_1.z.object({
+    body: zod_1.z.object({
+        email: zod_1.z
+            .string({
+            required_error: 'Email is required'
+        })
+            .email('Email is not valid'),
+        password: zod_1.z.string({
+            required_error: 'Password is required'
+        }),
+        center: zod_1.z
+            .string({
+            required_error: 'Center is required'
+        })
+            .uuid('Center is not a valid UUID')
+    })
+});
+exports.default = { signUp, confirmSignUp, adminCreation, centerCreation };

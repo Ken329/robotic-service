@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-vars */
 
-export enum STATUS {
+export enum CENTER_STATUS {
+  NOT_ASSIGN = 'Not Assign',
+  ASSIGNED = 'Assigned'
+}
+
+export enum USER_STATUS {
   PENDING = 'pending',
   REQUEST_UPDATE = 'request update',
   APPROVED = 'approved'

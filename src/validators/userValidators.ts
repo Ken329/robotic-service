@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ROLE } from '../utils/constant';
 
 const signUp = z.object({
   body: z.object({
@@ -36,13 +35,11 @@ const signUp = z.object({
     nationality: z.string({
       required_error: 'Nationality is required'
     }),
-    center: z.string({
-      required_error: 'Center is required'
-    }),
-    role: z.enum([ROLE.STUDENT, ROLE.CENTER, ROLE.ADMIN], {
-      required_error: 'Role is required',
-      invalid_type_error: 'Role is is not match'
-    })
+    center: z
+      .string({
+        required_error: 'Center is required'
+      })
+      .uuid('Center is not a valid UUID')
   })
 });
 
@@ -59,4 +56,35 @@ const confirmSignUp = z.object({
   })
 });
 
-export default { signUp, confirmSignUp };
+const adminCreation = z.object({
+  body: z.object({
+    email: z
+      .string({
+        required_error: 'Email is required'
+      })
+      .email('Email is not valid'),
+    password: z.string({
+      required_error: 'Password is required'
+    })
+  })
+});
+
+const centerCreation = z.object({
+  body: z.object({
+    email: z
+      .string({
+        required_error: 'Email is required'
+      })
+      .email('Email is not valid'),
+    password: z.string({
+      required_error: 'Password is required'
+    }),
+    center: z
+      .string({
+        required_error: 'Center is required'
+      })
+      .uuid('Center is not a valid UUID')
+  })
+});
+
+export default { signUp, confirmSignUp, adminCreation, centerCreation };

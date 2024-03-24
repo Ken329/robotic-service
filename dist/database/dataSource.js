@@ -7,6 +7,7 @@ require("reflect-metadata");
 const dotenv_1 = __importDefault(require("dotenv"));
 const typeorm_1 = require("typeorm");
 const User_1 = require("./entity/User");
+const Center_1 = require("./entity/Center");
 dotenv_1.default.config();
 const dbConnection = new typeorm_1.DataSource({
     type: 'mssql',
@@ -17,9 +18,7 @@ const dbConnection = new typeorm_1.DataSource({
     database: process.env.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: [User_1.User],
-    subscribers: [],
-    migrations: [],
+    entities: [Center_1.Center, User_1.User],
     options: { encrypt: false }
 });
 dbConnection

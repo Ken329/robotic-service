@@ -5,8 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate = void 0;
 const lodash_1 = require("lodash");
+const zod_1 = require("zod");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const userValidators_1 = __importDefault(require("./userValidators"));
+const centerValidators_1 = __importDefault(require("./centerValidators"));
 const helpers_1 = require("../utils/helpers");
 const validate = (schema) => async (req, res, next) => {
     try {
@@ -24,4 +26,13 @@ const validate = (schema) => async (req, res, next) => {
     }
 };
 exports.validate = validate;
-exports.default = { UserValidators: userValidators_1.default };
+const ParamsId = zod_1.z.object({
+    params: zod_1.z.object({
+        id: zod_1.z
+            .string({
+            required_error: 'Id is required'
+        })
+            .uuid('Id is not valid')
+    })
+});
+exports.default = { ParamsId, UserValidators: userValidators_1.default, CenterValidators: centerValidators_1.default };

@@ -1,8 +1,9 @@
 import { get, map } from 'lodash';
-import { AnyZodObject } from 'zod';
+import { z, AnyZodObject } from 'zod';
 import httpStatusCode from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
-import AuthValidators from './authValidators';
+import UserValidators from './userValidators';
+import CenterValidators from './centerValidators';
 import { errorApiResponse } from '../utils/helpers';
 
 export const validate =
@@ -32,4 +33,14 @@ export const validate =
     }
   };
 
-export default AuthValidators;
+const ParamsId = z.object({
+  params: z.object({
+    id: z
+      .string({
+        required_error: 'Id is required'
+      })
+      .uuid('Id is not valid')
+  })
+});
+
+export default { ParamsId, UserValidators, CenterValidators };

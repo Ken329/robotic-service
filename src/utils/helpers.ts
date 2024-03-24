@@ -47,7 +47,7 @@ export const errorApiResponse = (
 export const getPublicKey = () =>
   fs.readFileSync(process.env.PUBLIC_KEY_PATH, 'utf8');
 
-export const encryption = (payload: object) => {
+export const encryption = (payload: string) => {
   try {
     const rsaEncryption = new nodeRsa(getPublicKey());
     const encryptedData = rsaEncryption.encrypt(payload, 'base64');

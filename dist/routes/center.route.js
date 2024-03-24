@@ -28,19 +28,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const validators_1 = __importStar(require("../validators"));
-const userController_1 = __importDefault(require("../controllers/userController"));
+const centerController_1 = __importDefault(require("../controllers/centerController"));
 const auth_provider_1 = require("../providers/auth.provider");
 const route = (0, express_1.default)();
-route.get('/api/user', (0, auth_provider_1.authenticate)([
-    auth_provider_1.AUTH_STRATEGY.PROSPECT,
-    auth_provider_1.AUTH_STRATEGY.ADMIN,
-    auth_provider_1.AUTH_STRATEGY.CENTER
-]), userController_1.default.user);
-route.post('/api/user/sign-up', (0, validators_1.validate)(validators_1.default.UserValidators.signUp), userController_1.default.signUp);
-route.post('/api/user/confirm-sign-up', (0, validators_1.validate)(validators_1.default.UserValidators.confirmSignUp), userController_1.default.confirmSignUp);
-route.post('/api/user/center', (0, auth_provider_1.authenticate)(auth_provider_1.AUTH_STRATEGY.ADMIN), (0, validators_1.validate)(validators_1.default.UserValidators.centerCreation), userController_1.default.createCenter);
-/**
- * Internal Route For Admin Creation
- */
-route.post('/api/user/admin', (0, auth_provider_1.authenticate)(auth_provider_1.AUTH_STRATEGY.APIKEY), (0, validators_1.validate)(validators_1.default.UserValidators.adminCreation), userController_1.default.createAdmin);
+route.get('/api/center', (0, validators_1.validate)(validators_1.default.CenterValidators.getCenters), centerController_1.default.centers);
+route.post('/api/center', (0, auth_provider_1.authenticate)(auth_provider_1.AUTH_STRATEGY.ADMIN), (0, validators_1.validate)(validators_1.default.CenterValidators.createCenter), centerController_1.default.createCenter);
 exports.default = route;

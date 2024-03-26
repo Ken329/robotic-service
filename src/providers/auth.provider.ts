@@ -48,7 +48,7 @@ const verifyProspect = async (req: Request, done: any) => {
 
   try {
     const session = await AuthService.verifyUser(token);
-    const user = await UserService.get(session.sub);
+    const user = await UserService.user(session.sub);
 
     if (user.role !== ROLE.STUDENT) throwErrorsHttp('Role is not matched');
 
@@ -67,7 +67,7 @@ const verifyCenter = async (req: Request, done: any) => {
 
   try {
     const session = await AuthService.verifyUser(token);
-    const user = await UserService.get(session.sub);
+    const user = await UserService.user(session.sub);
 
     if (user.role !== ROLE.CENTER) throwErrorsHttp('Role is not matched');
 
@@ -86,7 +86,7 @@ const verifyAdmin = async (req: Request, done: any) => {
 
   try {
     const session = await AuthService.verifyUser(token);
-    const user = await UserService.get(session.sub);
+    const user = await UserService.user(session.sub);
 
     if (user.role !== ROLE.ADMIN) throwErrorsHttp('Role is not matched');
 

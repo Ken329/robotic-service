@@ -6,13 +6,20 @@ export enum CENTER_STATUS {
 }
 
 export enum USER_STATUS {
-  PENDING = 'pending',
-  REQUEST_UPDATE = 'request update',
-  APPROVED = 'approved'
+  PENDING_CENTER = 'pending center',
+  PENDING_ADMIN = 'pending admin',
+  APPROVED = 'approved',
+  REJECT = 'rejected'
 }
 
 export enum ROLE {
   STUDENT = 'student',
   CENTER = 'center',
   ADMIN = 'admin'
+}
+
+export enum RELATIONSHIP {
+  FATHER = 'father',
+  MOTHER = 'mother',
+  OTHERS = 'others'
 }

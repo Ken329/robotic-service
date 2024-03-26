@@ -10,17 +10,17 @@ const centers = async (req: Request, res: Response) => {
 
     return successApiResponse(
       res,
-      'Successfully signed up',
-      'User Controller',
-      'Sign Up',
+      'Successfully get centers',
+      'Center Controller',
+      'Centers',
       data
     );
   } catch (error) {
     return errorApiResponse(
       res,
-      'Failed to signed up',
-      'User Controller',
-      'Sign Up',
+      'Failed to get centers',
+      'Center Controller',
+      'Centers',
       error.message
     );
   }
@@ -35,17 +35,17 @@ const createCenter = async (req: Request, res: Response) => {
 
     return successApiResponse(
       res,
-      'Successfully signed up',
-      'User Controller',
-      'Sign Up',
+      'Successfully create center',
+      'Center Controller',
+      'Create Center',
       pick(data, ['id', 'name', 'location', 'status'])
     );
   } catch (error) {
     return errorApiResponse(
       res,
-      'Failed to signed up',
-      'User Controller',
-      'Sign Up',
+      'Failed to create center',
+      'Center Controller',
+      'Create Center',
       error.message
     );
   }

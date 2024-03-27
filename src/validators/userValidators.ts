@@ -1,5 +1,13 @@
 import { z } from 'zod';
-import { USER_STATUS, RELATIONSHIP, ROLE } from '../utils/constant';
+import {
+  ROLE,
+  GENDER,
+  DOB_REGEX,
+  USER_STATUS,
+  NRIC_REGEX,
+  RELATIONSHIP,
+  CONTACT_REGEX
+} from '../utils/constant';
 
 const users = z.object({
   query: z.object({
@@ -34,26 +42,32 @@ const signUp = z.object({
     password: z.string({
       required_error: 'Password is required'
     }),
+    fullName: z.string({
+      required_error: 'Full name is required'
+    }),
+    gender: z.enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
+      required_error: 'Relationship is required'
+    }),
+    dob: z
+      .string({
+        required_error: 'Date of Birth is required'
+      })
+      .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000'),
     nric: z
       .string({
         required_error: 'NRIC is required'
       })
-      .min(1, { message: 'NRIC should not be empty' }),
+      .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****'),
     contact: z
       .string({
         required_error: 'Contact is required'
       })
-      .min(1, { message: 'Contact should not be empty' }),
+      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789'),
     race: z
       .string({
         required_error: 'Race is required'
       })
       .min(1, { message: 'Race should not be empty' }),
-    personalEmail: z
-      .string({
-        required_error: 'Personal Email is required'
-      })
-      .email('Personal Email is not valid'),
     moeEmail: z
       .string({
         required_error: 'Moe Email is required'
@@ -89,7 +103,7 @@ const signUp = z.object({
       .string({
         required_error: 'Parent contact is required'
       })
-      .min(1, { message: 'Parent contact should not be empty' }),
+      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789'),
     center: z
       .string({
         required_error: 'Center is required'
@@ -154,25 +168,35 @@ const approval = z.object({
       .string({
         required_error: 'NRIC is required'
       })
-      .min(1, { message: 'NRIC should not be empty' })
+      .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****')
+      .optional(),
+    fullName: z
+      .string({
+        required_error: 'Full name is required'
+      })
+      .optional(),
+    gender: z
+      .enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
+        required_error: 'Relationship is required'
+      })
+      .optional(),
+    dob: z
+      .string({
+        required_error: 'Date of Birth is required'
+      })
+      .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000')
       .optional(),
     contact: z
       .string({
         required_error: 'Contact is required'
       })
-      .min(1, { message: 'Contact should not be empty' })
+      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
       .optional(),
     race: z
       .string({
         required_error: 'Race is required'
       })
       .min(1, { message: 'Race should not be empty' })
-      .optional(),
-    personalEmail: z
-      .string({
-        required_error: 'Personal Email is required'
-      })
-      .email('Personal Email is not valid')
       .optional(),
     moeEmail: z
       .string({
@@ -213,7 +237,7 @@ const approval = z.object({
       .string({
         required_error: 'Parent contact is required'
       })
-      .min(1, { message: 'Parent contact should not be empty' })
+      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +6012-3456789')
       .optional()
   })
 });

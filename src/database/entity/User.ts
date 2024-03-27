@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { Center } from './Center';
-import { ROLE, USER_STATUS, RELATIONSHIP } from '../../utils/constant';
+import { ROLE, USER_STATUS, RELATIONSHIP, GENDER } from '../../utils/constant';
 
 @Entity()
 export class User {
@@ -28,10 +28,16 @@ export class User {
   nric: string;
 
   @Column({ nullable: true })
-  contact: string;
+  fullName: string;
+
+  @Column({ type: 'varchar', enum: GENDER, nullable: true })
+  gender: string;
 
   @Column({ nullable: true })
-  personalEmail: string;
+  dob: string;
+
+  @Column({ nullable: true })
+  contact: string;
 
   @Column({ nullable: true })
   moeEmail: string;

@@ -20,8 +20,10 @@ type UserResponse = {
   center: string;
   role: string;
   nric: string;
+  fullName: string;
+  gender: string;
+  dob: string;
   contact: string;
-  personalEmail: string;
   moeEmail: string;
   race: string;
   school: string;
@@ -58,9 +60,11 @@ class UserService {
       status: user.status,
       center: user.center,
       role: user.role,
+      fullName: user.fullName,
+      gender: user.gender,
+      dob: user.dob,
       nric: user.nric,
       contact: user.contact,
-      personalEmail: user.personalEmail,
       moeEmail: user.moeEmail,
       race: user.race,
       school: user.school,
@@ -90,9 +94,11 @@ class UserService {
       status: user.status,
       center: user.center,
       role: user.role,
+      fullName: user.fullName,
+      gender: user.gender,
+      dob: user.dob,
       nric: user.nric,
       contact: user.contact,
-      personalEmail: user.personalEmail,
       moeEmail: user.moeEmail,
       race: user.race,
       school: user.school,
@@ -111,9 +117,11 @@ class UserService {
       role: ROLE;
       status?: USER_STATUS;
       nric?: string;
+      fullName?: string;
+      gender?: string;
+      dob?: string;
       contact?: string;
       race?: string;
-      personalEmail?: string;
       moeEmail?: string;
       school?: string;
       nationality?: string;
@@ -148,7 +156,9 @@ class UserService {
     user.nric = payload.nric;
     user.contact = payload.contact;
     user.race = payload.race;
-    user.personalEmail = payload.personalEmail;
+    user.fullName = payload.fullName;
+    user.gender = payload.gender;
+    user.dob = payload.dob;
     user.moeEmail = payload.moeEmail;
     user.school = payload.school;
     user.nationality = payload.nationality;
@@ -175,9 +185,11 @@ class UserService {
     role: ROLE,
     payload: {
       nric?: string;
+      fullName?: string;
+      gender?: string;
+      dob?: string;
       contact?: string;
       race?: string;
-      personalEmail?: string;
       moeEmail?: string;
       school?: string;
       nationality?: string;
@@ -196,9 +208,13 @@ class UserService {
 
     const filterPayload = pick(payload, [
       'nric',
+      'fullName',
+      'gender',
+      'dob',
+      'nric',
+      'nric',
       'contact',
       'race',
-      'personalEmail',
       'moeEmail',
       'school',
       'nationality',

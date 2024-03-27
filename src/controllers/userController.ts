@@ -14,23 +14,23 @@ const user = async (req: Request, res: Response) =>
     req.user
   );
 
-const students = async (req: Request, res: Response) => {
+const users = async (req: Request, res: Response) => {
   try {
-    const students = await UserService.users(req.query);
+    const users = await UserService.users(req.query);
 
     return successApiResponse(
       res,
-      'Successfully get list of students',
+      'Successfully get list of users',
       'User Controller',
-      'Students',
-      students
+      'Users',
+      users
     );
   } catch (error) {
     return errorApiResponse(
       res,
-      'Failed to get list of students',
+      'Failed to get list of users',
       'User Controller',
-      'Students',
+      'Users',
       error.message
     );
   }
@@ -202,7 +202,7 @@ const signUpReject = async (req: Request, res: Response) => {
 
 export default {
   user,
-  students,
+  users,
   signUp,
   createCenter,
   createAdmin,

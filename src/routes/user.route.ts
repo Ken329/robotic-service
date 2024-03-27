@@ -19,7 +19,7 @@ route.get(
   '/api/users',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   validate(Validators.UserValidators.users),
-  UserController.students
+  UserController.users
 );
 
 route.post(

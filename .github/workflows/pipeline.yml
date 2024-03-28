@@ -36,5 +36,6 @@ jobs:
           touch encryption-private-key.pem
           echo "${{ secrets.UAT_PRIVATE_KEY }}" > encryption-private-key.pem
 
-      - name: Start Server
-        run: pm2 restart RoboticService
+      # NOTE: start server after ec2 is finalize
+      # - name: Start Server
+      #   run: pm2 restart RoboticService

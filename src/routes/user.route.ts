@@ -15,16 +15,17 @@ route.get(
   UserController.user
 );
 
-route.post(
-  '/api/user/sign-up',
-  validate(Validators.UserValidators.signUp),
-  UserController.signUp
+route.get(
+  '/api/users',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.UserValidators.users),
+  UserController.users
 );
 
 route.post(
-  '/api/user/confirm-sign-up',
-  validate(Validators.UserValidators.confirmSignUp),
-  UserController.confirmSignUp
+  '/api/user/student',
+  validate(Validators.UserValidators.signUp),
+  UserController.signUp
 );
 
 route.post(
@@ -42,6 +43,33 @@ route.post(
   authenticate(AUTH_STRATEGY.APIKEY),
   validate(Validators.UserValidators.adminCreation),
   UserController.createAdmin
+);
+
+/**
+ * Verify OTP for all account creation
+ */
+route.post(
+  '/api/user/verify-otp',
+  validate(Validators.UserValidators.confirmSignUp),
+  UserController.confirmSignUp
+);
+
+/**
+ * Approval management routes
+ */
+route.post(
+  '/api/user/:id/approve',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.ParamsId),
+  validate(Validators.UserValidators.approval),
+  UserController.signUpApproval
+);
+
+route.post(
+  '/api/user/:id/reject',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.ParamsId),
+  UserController.signUpReject
 );
 
 export default route;

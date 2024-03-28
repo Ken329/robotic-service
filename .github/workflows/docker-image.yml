@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ['develop']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login Docker Hub
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+      - name: Build the Docker image
+        run: docker build -t robotic-portal .
+
+      - name: Push to Docker Hub
+        run: docker push kenliau0329/robotic-portal:latest

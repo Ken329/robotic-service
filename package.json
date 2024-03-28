@@ -7,7 +7,9 @@
     "start": "node dist/index.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "typeorm": "npm run build && npx typeorm -d build/task/data.source.js",
+    "migration:generate": "npm run typeorm -- migration:generate"
   },
   "repository": {
     "type": "git",

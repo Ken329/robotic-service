@@ -50,6 +50,7 @@ export const successApiResponse = (
   statusCode = httpStatusCode.OK
 ) => {
   let filterPayload = payload;
+  console.log();
   if (isObject(filterPayload) && get(filterPayload, 'nric', null)) {
     filterPayload = {
       ...filterPayload,
@@ -64,6 +65,7 @@ export const successApiResponse = (
           nric: maskingValue(el.nric)
         };
       }
+      return el;
     });
   }
 

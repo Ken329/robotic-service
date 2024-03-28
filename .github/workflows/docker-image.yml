@@ -18,7 +18,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build the Docker image
-        run: docker build -t robotic-portal .
+        run: docker build -t kenliau0329/robotic-portal .
 
       - name: Push to Docker Hub
         run: docker push kenliau0329/robotic-portal:latest

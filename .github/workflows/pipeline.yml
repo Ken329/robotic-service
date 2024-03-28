@@ -27,7 +27,7 @@ jobs:
       - name: Compile with typescript
         run: npm run build
 
-      - name: Set env to staging
+      - name: Set env for UAT
         if: endsWith(github.ref, '/uat')
         run: |
           touch .env
@@ -37,7 +37,7 @@ jobs:
           touch encryption-private-key.pem
           echo "${{ secrets.UAT_PRIVATE_KEY }}" > encryption-private-key.pem
 
-      - name: Set env to production
+      - name: Set env for PRODUCTION
         if: endsWith(github.ref, '/master')
         run: |
           touch .env
@@ -47,5 +47,6 @@ jobs:
           touch encryption-private-key.pem
           echo "${{ secrets.MASTER_PRIVATE_KEY }}" > encryption-private-key.pem
 
-      - name: Start Server
-        run: pm2 restart RoboticService
+      # NOTE: undo this after ec2 instance being finalize
+      # - name: Start Server
+      #   run: pm2 restart RoboticService

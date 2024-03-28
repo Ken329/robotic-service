@@ -19,14 +19,17 @@ const dbConnection = new DataSource({
   options: { encrypt: false }
 });
 
-dbConnection
-  .initialize()
-  .then(() => {
-    console.log(`Data Source has been initialized`);
-  })
-  .catch((error) => {
-    console.error(`Data Source initialization error: ${error.message}`);
-    process.exit(1);
-  });
+// NOTE: remove this code after database being finalize
+if (process.env.NODE_ENV === 'development') {
+  dbConnection
+    .initialize()
+    .then(() => {
+      console.log(`Data Source has been initialized`);
+    })
+    .catch((error) => {
+      console.error(`Data Source initialization error: ${error.message}`);
+      process.exit(1);
+    });
+}
 
 export default dbConnection;

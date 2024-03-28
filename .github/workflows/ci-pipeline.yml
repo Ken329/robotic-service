@@ -1,8 +1,8 @@
-name: Docker Image CI
+name: Robotic Portal CI Pipeline
 
 on:
   push:
-    branches: ['develop']
+    branches: ['uat', 'master']
 
 jobs:
   build:

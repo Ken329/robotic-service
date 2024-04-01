@@ -28,4 +28,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build the Docker image
-        run: docker build -t robotic-portal/backend-service .
+        run: docker build -t kenliau0329/robotic-backend .
+
+      - name: Push to Docker Hub
+        run: docker push kenliau0329/robotic-backend:latest

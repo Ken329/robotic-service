@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  robotic-portal:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: builder
+    volumes:
+      - ./src:/usr/app/src
+    container_name: robotic-portal
+    ports:
+      - '7000:8080'
+    command: npm run start

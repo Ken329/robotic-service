@@ -1,5 +1,5 @@
 import { In } from 'typeorm';
-import { get, map, pick, set } from 'lodash';
+import { get, isEmpty, map, pick, set } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
@@ -20,6 +20,7 @@ type UserResponse = {
   center: string;
   role: string;
   nric: string;
+  passport: string;
   fullName: string;
   gender: string;
   dob: string;
@@ -64,6 +65,7 @@ class UserService {
       gender: user.gender,
       dob: user.dob,
       nric: user.nric,
+      passport: user.passport,
       contact: user.contact,
       moeEmail: user.moeEmail,
       race: user.race,
@@ -98,6 +100,7 @@ class UserService {
       gender: user.gender,
       dob: user.dob,
       nric: user.nric,
+      passport: user.passport,
       contact: user.contact,
       moeEmail: user.moeEmail,
       race: user.race,
@@ -117,6 +120,7 @@ class UserService {
       role: ROLE;
       status?: USER_STATUS;
       nric?: string;
+      passport?: string;
       fullName?: string;
       gender?: string;
       dob?: string;
@@ -134,13 +138,28 @@ class UserService {
   ): Promise<UserResponse> {
     const center = await CenterService.center(payload.center);
     const centerStatus = get(center, 'status', null);
+
+    if (payload.role === ROLE.STUDENT) {
+      if (payload.nationality === 'malaysia' && isEmpty(payload.nric)) {
+        throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
+      } else if (
+        payload.nationality !== 'malaysia' &&
+        isEmpty(payload.passport)
+      ) {
+        throwErrorsHttp('Passport is required', httpStatusCode.BAD_REQUEST);
+      } else if (centerStatus !== CENTER_STATUS.ASSIGNED) {
+        throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
+      }
+    }
+
     if (
-      (payload.role === ROLE.STUDENT &&
-        centerStatus !== CENTER_STATUS.ASSIGNED) ||
-      (payload.role === ROLE.CENTER &&
-        centerStatus !== CENTER_STATUS.NOT_ASSIGN)
+      payload.role === ROLE.CENTER &&
+      centerStatus !== CENTER_STATUS.NOT_ASSIGN
     ) {
-      throwErrorsHttp('Center is valid', httpStatusCode.BAD_REQUEST);
+      throwErrorsHttp(
+        'Center has been assgned, please choose other center',
+        httpStatusCode.BAD_REQUEST
+      );
     }
 
     const decryptedPassword = decryption(password);
@@ -154,6 +173,7 @@ class UserService {
     user.role = payload.role;
     user.status = get(payload, 'status', USER_STATUS.PENDING_CENTER);
     user.nric = payload.nric;
+    user.passport = payload.passport;
     user.contact = payload.contact;
     user.race = payload.race;
     user.fullName = payload.fullName;
@@ -185,6 +205,7 @@ class UserService {
     role: ROLE,
     payload: {
       nric?: string;
+      passport?: string;
       fullName?: string;
       gender?: string;
       dob?: string;
@@ -199,7 +220,7 @@ class UserService {
       parentContact?: string;
     }
   ): Promise<UserResponse> {
-    await this.user(id, {
+    const user = await this.user(id, {
       status:
         role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
@@ -212,7 +233,7 @@ class UserService {
       'gender',
       'dob',
       'nric',
-      'nric',
+      'passport',
       'contact',
       'race',
       'moeEmail',
@@ -223,6 +244,35 @@ class UserService {
       'parentEmail',
       'parentContact'
     ]);
+
+    if (
+      filterPayload.nationality ||
+      filterPayload.nric ||
+      filterPayload.passport
+    ) {
+      const updatedUserData = {
+        nationality: filterPayload.nationality
+          ? filterPayload.nationality
+          : user.nationality,
+        nric: filterPayload.nric ? filterPayload.nric : user.nric,
+        passport: filterPayload.passport
+          ? filterPayload.passport
+          : user.passport
+      };
+
+      if (
+        updatedUserData.nationality === 'malaysia' &&
+        isEmpty(updatedUserData.nric)
+      ) {
+        throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
+      } else if (
+        updatedUserData.nationality !== 'malaysia' &&
+        isEmpty(updatedUserData.passport)
+      ) {
+        throwErrorsHttp('Passport is required', httpStatusCode.BAD_REQUEST);
+      }
+    }
+
     set(
       filterPayload,
       'status',

@@ -1,31 +1,23 @@
-FROM node as builder
+FROM node:20.10.0-alpine3.18 as builder
 
 # Create app directory
-WORKDIR /usr/src/app
-
-# Install app dependencies
-COPY package*.json ./
-
-RUN npm ci
+WORKDIR /tmp/app
 
 COPY . .
 
+RUN npm ci
 RUN npm run build
 
-FROM node:slim
+FROM node:20.10.0-alpine3.18
 
-ENV NODE_ENV production
+WORKDIR /usr/app
+
+COPY --from=builder /tmp/app/node_modules node_modules
+COPY --from=builder /tmp/app/dist ./dist
+COPY --from=builder /tmp/app/package*.json ./
+
 USER node
 
-# Create app directory
-WORKDIR /usr/src/app
-
-# Install app dependencies
-COPY package*.json ./
-
-RUN npm ci 
-
-COPY --from=builder /usr/src/app/dist ./dist
-
 EXPOSE 8080
+
 CMD [ "node", "dist/index.js" ]

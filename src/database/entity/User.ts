@@ -28,6 +28,9 @@ export class User {
   nric: string;
 
   @Column({ nullable: true })
+  passport: string;
+
+  @Column({ nullable: true })
   fullName: string;
 
   @Column({ type: 'varchar', enum: GENDER, nullable: true })

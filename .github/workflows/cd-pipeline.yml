@@ -11,11 +11,5 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Pull Docker Image
-        run: sudo docker pull kenliau0329/robotic-portal:latest
-
-      - name: Remote the existing container
-        run: sudo docker rm -f robotic-portal-container || true
-
-      - name: Run new docker container
-        run: sudo docker run -d -p 8080:8080 --name robotic-portal-container kenliau0329/robotic-portal
+      - name: Run the docker image in container
+        run: docker-compose up

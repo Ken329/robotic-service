@@ -57,12 +57,19 @@ const signUp = z.object({
       .string({
         required_error: 'NRIC is required'
       })
-      .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****'),
+      .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****')
+      .optional(),
+    passport: z
+      .string({
+        required_error: 'Passport is required'
+      })
+      .optional(),
     contact: z
       .string({
         required_error: 'Contact is required'
       })
-      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789'),
+      .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
+      .optional(),
     race: z
       .string({
         required_error: 'Race is required'
@@ -72,7 +79,8 @@ const signUp = z.object({
       .string({
         required_error: 'Moe Email is required'
       })
-      .email('Moe Email is not valid'),
+      .email('Moe Email is not valid')
+      .optional(),
     school: z
       .string({
         required_error: 'School is required'

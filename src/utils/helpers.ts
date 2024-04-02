@@ -1,9 +1,8 @@
 import fs from 'fs';
-import crypto from 'crypto';
 import nodeRsa from 'node-rsa';
 import { Response } from 'express';
 import httpStatusCode from 'http-status-codes';
-import { defaultTo, get, isArray, isObject } from 'lodash';
+import { get, isArray, isObject } from 'lodash';
 
 interface ErrorWithStatus extends Error {
   status: number;
@@ -51,7 +50,6 @@ export const successApiResponse = (
   statusCode = httpStatusCode.OK
 ) => {
   let filterPayload = payload;
-  console.log();
   if (isObject(filterPayload) && get(filterPayload, 'nric', null)) {
     filterPayload = {
       ...filterPayload,
@@ -91,28 +89,4 @@ export const errorApiResponse = (
     success: false,
     message
   });
-};
-
-export const generateKeyPair = () => {
-  const publicKeyPath = defaultTo(process.env.PUBLIC_KEY_PATH, null);
-  const privateKeyPath = defaultTo(process.env.PRIVATE_KEY_PATH, null);
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: {
-      type: 'pkcs1',
-      format: 'pem'
-    },
-    privateKeyEncoding: {
-      type: 'pkcs1',
-      format: 'pem'
-    }
-  });
-
-  if (publicKeyPath && !fs.existsSync(publicKeyPath)) {
-    fs.writeFileSync(publicKeyPath, publicKey);
-  }
-
-  if (privateKeyPath && !fs.existsSync(privateKeyPath)) {
-    fs.writeFileSync(privateKeyPath, privateKey);
-  }
 };

@@ -1,17 +1,15 @@
 import * as dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import Express, { Application } from 'express';
-import DataSource from './database/dataSource';
 import AuthRoute from './routes/auth.route';
 import UserRoute from './routes/user.route';
+import DataSource from './database/dataSource';
 import CenterRoute from './routes/center.route';
-import { generateKeyPair } from './utils/helpers';
 import authProvider from './providers/auth.provider';
 
 dotenv.config();
 
 DataSource;
-generateKeyPair();
 
 const app: Application = Express();
 const port: string = process.env.PORT || '8080';

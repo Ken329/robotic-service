@@ -13,11 +13,11 @@ FROM node:20.10.0-alpine3.18
 WORKDIR /usr/app
 
 COPY --from=builder /tmp/app/node_modules node_modules
-COPY --from=builder /tmp/app/dist ./dist
+COPY --from=builder /tmp/app/dist dist
 COPY --from=builder /tmp/app/package*.json ./
 
 USER node
 
 EXPOSE 8080
 
-CMD [ "node", "dist/index.js" ]
+CMD [ "sh", "-c", "npm run start" ]

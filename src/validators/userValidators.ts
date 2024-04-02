@@ -9,6 +9,8 @@ import {
   CONTACT_REGEX
 } from '../utils/constant';
 
+const emptyStringToNull = z.literal('').transform(() => null);
+
 const users = z.object({
   query: z.object({
     status: z
@@ -23,12 +25,14 @@ const users = z.object({
           required_error: 'Status is valid'
         }
       )
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     role: z
       .enum([ROLE.STUDENT, ROLE.CENTER, ROLE.ADMIN], {
         required_error: 'ROle is valid'
       })
       .optional()
+      .or(emptyStringToNull)
   })
 });
 
@@ -58,18 +62,21 @@ const signUp = z.object({
         required_error: 'NRIC is required'
       })
       .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     passport: z
       .string({
         required_error: 'Passport is required'
       })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     contact: z
       .string({
         required_error: 'Contact is required'
       })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     race: z
       .string({
         required_error: 'Race is required'
@@ -80,7 +87,8 @@ const signUp = z.object({
         required_error: 'Moe Email is required'
       })
       .email('Moe Email is not valid')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     school: z
       .string({
         required_error: 'School is required'
@@ -177,76 +185,89 @@ const approval = z.object({
         required_error: 'NRIC is required'
       })
       .regex(NRIC_REGEX, 'Invalid NRIC format eg: ******-**-****')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     fullName: z
       .string({
         required_error: 'Full name is required'
       })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     gender: z
       .enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
         required_error: 'Relationship is required'
       })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     dob: z
       .string({
         required_error: 'Date of Birth is required'
       })
       .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     contact: z
       .string({
         required_error: 'Contact is required'
       })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     race: z
       .string({
         required_error: 'Race is required'
       })
       .min(1, { message: 'Race should not be empty' })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     moeEmail: z
       .string({
         required_error: 'Moe Email is required'
       })
       .email('Moe Email is not valid')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     school: z
       .string({
         required_error: 'School is required'
       })
       .min(1, { message: 'School should not be empty' })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     nationality: z
       .string({
         required_error: 'Nationality is required'
       })
       .min(1, { message: 'Nationality should not be empty' })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     parentName: z
       .string({
         required_error: 'Parent name is required'
       })
       .min(1, { message: 'Parent name should not be empty' })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     relationship: z
       .enum([RELATIONSHIP.FATHER, RELATIONSHIP.MOTHER, RELATIONSHIP.OTHERS], {
         required_error: 'Relationship is required'
       })
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     parentEmail: z
       .string({
         required_error: 'Parent Email is required'
       })
       .email('Parent Email is not valid')
-      .optional(),
+      .optional()
+      .or(emptyStringToNull),
     parentContact: z
       .string({
         required_error: 'Parent contact is required'
       })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +6012-3456789')
       .optional()
+      .or(emptyStringToNull)
   })
 });
 

@@ -11,6 +11,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Setting up environment variables
+        run: |
+          touch .env
+          echo "${{ secrets.UAT_ENV_FILE }}" > .env
+
       - name: Pull Docker Image
         run: sudo docker pull kenliau0329/robotic-backend:latest
 

@@ -4,11 +4,9 @@ services:
   robotic-portal:
     build:
       context: .
-      dockerfile: ./Dockerfile
-      target: builder
-    volumes:
-      - ./src:/usr/app/src
+    image: robotic-portal/robotic-server:latest
     container_name: robotic-portal
+    env_file:
+      - ./.env
     ports:
       - '7000:8080'
-    command: npm run start

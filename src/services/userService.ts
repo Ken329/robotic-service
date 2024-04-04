@@ -1,5 +1,5 @@
 import { In } from 'typeorm';
-import { get, isEmpty, map, pick, set } from 'lodash';
+import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
@@ -78,10 +78,14 @@ class UserService {
     };
   }
 
-  public async users(payload: {
-    status?: USER_STATUS;
-    role?: ROLE;
-  }): Promise<UserResponse[]> {
+  public async users(payload: { status?: USER_STATUS; role?: ROLE }): Promise<{
+    totalUser: number;
+    pendingCenter: any;
+    pendingAdmin: any;
+    approved: any;
+    rejected: any;
+    data: UserResponse[];
+  }> {
     const users = await this.userRepository.find({
       where: {
         status: payload.status
@@ -91,7 +95,7 @@ class UserService {
       }
     });
 
-    return map(users, (user) => ({
+    const mappedUsers = map(users, (user) => ({
       id: user.id,
       status: user.status,
       center: user.center,
@@ -111,6 +115,22 @@ class UserService {
       parentEmail: user.parentEmail,
       parentContact: user.parentContact
     }));
+
+    const groupedUsers = groupBy(mappedUsers, 'status');
+    console.log(groupedUsers);
+
+    return {
+      totalUser: mappedUsers.length,
+      pendingCenter: get(
+        groupedUsers,
+        `${USER_STATUS.PENDING_CENTER}.length`,
+        0
+      ),
+      pendingAdmin: get(groupedUsers, `${USER_STATUS.PENDING_ADMIN}.length`, 0),
+      approved: get(groupedUsers, `${USER_STATUS.APPROVED}.length`, 0),
+      rejected: get(groupedUsers, `${USER_STATUS.REJECT}.length`, 0),
+      data: mappedUsers
+    };
   }
 
   public async create(

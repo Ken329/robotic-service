@@ -117,7 +117,6 @@ class UserService {
     }));
 
     const groupedUsers = groupBy(mappedUsers, 'status');
-    console.log(groupedUsers);
 
     return {
       totalUser: mappedUsers.length,

@@ -6,199 +6,93 @@ import { errorApiResponse, successApiResponse } from '../utils/helpers';
 import { get } from 'lodash';
 
 const user = async (req: Request, res: Response) =>
-  successApiResponse(
-    res,
-    'Successfully get user',
-    'User Controller',
-    'Get user',
-    req.user
-  );
+  successApiResponse(res, 'Successfully get user', req.user);
 
-const users = async (req: Request, res: Response) => {
-  try {
-    const users = await UserService.users(req.query);
+const users = async (req: Request, res: Response) =>
+  UserService.users(req.query)
+    .then((data) =>
+      successApiResponse(res, 'Successfully get list of users', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
-    return successApiResponse(
-      res,
-      'Successfully get list of users',
-      'User Controller',
-      'Users',
-      users
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to get list of users',
-      'User Controller',
-      'Users',
-      error.message
-    );
-  }
-};
-
-const signUp = async (req: Request, res: Response) => {
-  try {
-    const user = await UserService.create(req.body.email, req.body.password, {
-      ...req.body,
-      role: ROLE.STUDENT
+const signUp = async (req: Request, res: Response) =>
+  UserService.create(req.body.email, req.body.password, {
+    ...req.body,
+    role: ROLE.STUDENT
+  })
+    .then((data) =>
+      successApiResponse(res, 'Successfully signed up', {
+        id: data.id,
+        email: req.body.email,
+        status: data.status,
+        center: data.center,
+        role: data.role
+      })
+    )
+    .catch((error) => {
+      return errorApiResponse(res, error.message);
     });
 
-    return successApiResponse(
-      res,
-      'Successfully signed up',
-      'User Controller',
-      'Sign Up',
-      {
-        id: user.id,
+const createCenter = async (req: Request, res: Response) =>
+  UserService.create(req.body.email, req.body.password, {
+    role: ROLE.CENTER,
+    status: USER_STATUS.APPROVED,
+    center: req.body.center
+  })
+    .then((data) =>
+      successApiResponse(res, 'Successfully create center', {
+        id: data.id,
         email: req.body.email,
-        status: user.status,
-        center: user.center,
-        role: user.role
-      }
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to signed up',
-      'User Controller',
-      'Sign Up',
-      error.message
-    );
-  }
-};
+        status: data.status,
+        center: data.center,
+        role: data.role
+      })
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
-const createCenter = async (req: Request, res: Response) => {
-  try {
-    const user = await UserService.create(req.body.email, req.body.password, {
-      role: ROLE.CENTER,
-      status: USER_STATUS.APPROVED,
-      center: req.body.center
-    });
-
-    return successApiResponse(
-      res,
-      'Successfully create center',
-      'User Controller',
-      'Create center',
-      {
-        id: user.id,
+const createAdmin = async (req: Request, res: Response) =>
+  UserService.create(req.body.email, req.body.password, {
+    role: ROLE.ADMIN,
+    status: USER_STATUS.APPROVED
+  })
+    .then((data) =>
+      successApiResponse(res, 'Successfully create admin', {
+        id: data.id,
         email: req.body.email,
-        status: user.status,
-        center: user.center,
-        role: user.role
-      }
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to create center',
-      'User Controller',
-      'Create center',
-      error.message
-    );
-  }
-};
+        status: data.status,
+        role: data.role
+      })
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
-const createAdmin = async (req: Request, res: Response) => {
-  try {
-    const user = await UserService.create(req.body.email, req.body.password, {
-      role: ROLE.ADMIN,
-      status: USER_STATUS.APPROVED
-    });
+const confirmSignUp = async (req: Request, res: Response) =>
+  AwsCognitoService.confirmedSignUp(req.body.email, req.body.code)
+    .then((data) =>
+      successApiResponse(res, 'Successfully confirm signed up', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
-    return successApiResponse(
-      res,
-      'Successfully create admin',
-      'User Controller',
-      'Create admin',
-      {
-        id: user.id,
-        email: req.body.email,
-        status: user.status,
-        role: user.role
-      }
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to create admin',
-      'User Controller',
-      'Create admin',
-      error.message
-    );
-  }
-};
+const signUpApproval = async (req: Request, res: Response) =>
+  UserService.approve(req.params.id, get(req, 'user.role'), req.body)
+    .then((data) =>
+      successApiResponse(
+        res,
+        `Successfully approve sign up by ${get(req, 'user.role')}`,
+        data
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
-const confirmSignUp = async (req: Request, res: Response) => {
-  try {
-    const data = await AwsCognitoService.confirmedSignUp(
-      req.body.email,
-      req.body.code
-    );
-
-    return successApiResponse(
-      res,
-      'Successfully confirm signed up',
-      'User Controller',
-      'Confirm Signed Up',
-      data
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to confirm signed up',
-      'User Controller',
-      'Confirm Signed Up',
-      error.message
-    );
-  }
-};
-
-const signUpApproval = async (req: Request, res: Response) => {
-  try {
-    const role = get(req, 'user.role');
-    const data = await UserService.approve(req.params.id, role, req.body);
-
-    return successApiResponse(
-      res,
-      `Successfully approve sign up by ${role}`,
-      'User Controller',
-      'Sign Up Approval',
-      data
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to approve sign up',
-      'User Controller',
-      'Sign Up Approval',
-      error.message
-    );
-  }
-};
-
-const signUpReject = async (req: Request, res: Response) => {
-  try {
-    const role = get(req, 'user.role');
-    const data = await UserService.reject(req.params.id, role);
-
-    return successApiResponse(
-      res,
-      `Successfully reject sign up by ${role}`,
-      'User Controller',
-      'Sign Up Approval',
-      data
-    );
-  } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed to reject sign up',
-      'User Controller',
-      'Sign Up Approval',
-      error.message
-    );
-  }
-};
+const signUpReject = async (req: Request, res: Response) =>
+  UserService.reject(req.params.id, get(req, 'user.role'))
+    .then((data) =>
+      successApiResponse(
+        res,
+        `Successfully reject sign up by ${get(req, 'user.role')}`,
+        data
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
 export default {
   user,

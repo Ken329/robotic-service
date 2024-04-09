@@ -6,7 +6,13 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { Center } from './Center';
-import { ROLE, USER_STATUS, RELATIONSHIP, GENDER } from '../../utils/constant';
+import {
+  ROLE,
+  GENDER,
+  USER_STATUS,
+  RELATIONSHIP,
+  PAYMENT_METHOD
+} from '../../utils/constant';
 
 @Entity()
 export class User {
@@ -65,6 +71,9 @@ export class User {
 
   @Column({ nullable: true })
   parentContact: string;
+
+  @Column({ type: 'varchar', enum: PAYMENT_METHOD, nullable: true })
+  paymentMethod: string;
 
   @Column({ type: 'varchar', enum: ROLE, nullable: true })
   rejectedBy: string;

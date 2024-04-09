@@ -4,12 +4,13 @@ import httpStatusCode from 'http-status-codes';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
 import DataSource from '../database/dataSource';
-import { decryption, throwErrorsHttp } from '../utils/helpers';
+import { decryption, throwErrorsHttp, maskingValue } from '../utils/helpers';
 import {
   ROLE,
   USER_STATUS,
   CENTER_STATUS,
-  RELATIONSHIP
+  RELATIONSHIP,
+  PAYMENT_METHOD
 } from '../utils/constant';
 import { User } from '../database/entity/User';
 import { Center } from '../database/entity/Center';
@@ -33,6 +34,7 @@ type UserResponse = {
   relationship: string;
   parentEmail: string;
   parentContact: string;
+  paymentMethod: string;
 };
 
 class UserService {
@@ -46,7 +48,7 @@ class UserService {
 
   public async user(
     id: string,
-    option?: { status?: USER_STATUS; role?: ROLE }
+    option?: { status?: USER_STATUS; role?: ROLE; maskNric?: boolean }
   ): Promise<UserResponse> {
     const query = pick(option, ['status', 'role']);
     const user = await this.userRepository.findOne({
@@ -55,6 +57,11 @@ class UserService {
     });
 
     if (!user) throwErrorsHttp('User not found', httpStatusCode.NOT_FOUND);
+
+    user.nric =
+      get(option, 'maskNric', true) && user.nric
+        ? maskingValue(user.nric)
+        : user.nric;
 
     return {
       id: user.id,
@@ -74,7 +81,8 @@ class UserService {
       parentName: user.parentName,
       relationship: user.relationship,
       parentEmail: user.parentEmail,
-      parentContact: user.parentContact
+      parentContact: user.parentContact,
+      paymentMethod: user.paymentMethod
     };
   }
 
@@ -103,7 +111,7 @@ class UserService {
       fullName: user.fullName,
       gender: user.gender,
       dob: user.dob,
-      nric: user.nric,
+      nric: maskingValue(user.nric),
       passport: user.passport,
       contact: user.contact,
       moeEmail: user.moeEmail,
@@ -113,7 +121,8 @@ class UserService {
       parentName: user.parentName,
       relationship: user.relationship,
       parentEmail: user.parentEmail,
-      parentContact: user.parentContact
+      parentContact: user.parentContact,
+      paymentMethod: user.paymentMethod
     }));
 
     const groupedUsers = groupBy(mappedUsers, 'status');
@@ -237,13 +246,15 @@ class UserService {
       relationship?: RELATIONSHIP;
       parentEmail?: string;
       parentContact?: string;
+      paymentMethod?: PAYMENT_METHOD;
     }
   ): Promise<UserResponse> {
     const user = await this.user(id, {
       status:
         role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
-          : USER_STATUS.PENDING_ADMIN
+          : USER_STATUS.PENDING_ADMIN,
+      maskNric: false
     });
 
     const filterPayload = pick(payload, [
@@ -292,11 +303,19 @@ class UserService {
       }
     }
 
-    set(
-      filterPayload,
-      'status',
-      role === ROLE.CENTER ? USER_STATUS.PENDING_ADMIN : USER_STATUS.APPROVED
-    );
+    let status = USER_STATUS.APPROVED;
+    if (role === ROLE.CENTER) {
+      if (!payload.paymentMethod) {
+        throwErrorsHttp(
+          'Payment method is required',
+          httpStatusCode.BAD_REQUEST
+        );
+      }
+      status = USER_STATUS.PENDING_ADMIN;
+      set(filterPayload, 'paymentMethod', payload.paymentMethod);
+    }
+
+    set(filterPayload, 'status', status);
     await this.userRepository.update({ id }, { ...filterPayload });
     return this.user(id);
   }

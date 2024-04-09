@@ -30,6 +30,12 @@ export enum GENDER {
   OTHERS = 'others'
 }
 
+export enum PAYMENT_METHOD {
+  CASH = 'cash',
+  CREDIT_CARD = 'credit card',
+  BANK_TRANSFER = 'bank transfer'
+}
+
 export const CONTACT_REGEX = new RegExp(
   /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$/
 );

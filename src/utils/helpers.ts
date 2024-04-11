@@ -37,8 +37,10 @@ export const decryption = (payload: string) => {
   }
 };
 
-export const maskingValue = (value: string) =>
-  value.replace(/\d(?=(?:\D*\d){4})/g, '*');
+export const maskingValue = (value: string) => {
+  if (!value) return null;
+  return value.replace(/\d(?=(?:\D*\d){4})/g, '*');
+};
 
 export const successApiResponse = (
   res: Response,

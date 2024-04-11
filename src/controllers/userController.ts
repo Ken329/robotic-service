@@ -9,7 +9,11 @@ const user = async (req: Request, res: Response) =>
   successApiResponse(res, 'Successfully get user', req.user);
 
 const users = async (req: Request, res: Response) =>
-  UserService.users(req.query)
+  UserService.users(req.query, {
+    id: get(req.user, 'id'),
+    role: get(req.user, 'role'),
+    centerId: get(req.user, 'centerId')
+  })
     .then((data) =>
       successApiResponse(res, 'Successfully get list of users', data)
     )
@@ -25,7 +29,7 @@ const signUp = async (req: Request, res: Response) =>
         id: data.id,
         email: req.body.email,
         status: data.status,
-        center: data.center,
+        centerName: data.centerName,
         role: data.role
       })
     )
@@ -44,7 +48,7 @@ const createCenter = async (req: Request, res: Response) =>
         id: data.id,
         email: req.body.email,
         status: data.status,
-        center: data.center,
+        centerName: data.centerName,
         role: data.role
       })
     )

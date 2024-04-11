@@ -57,7 +57,7 @@ const signUp = z.object({
       .string({
         required_error: 'Date of Birth is required'
       })
-      .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000'),
+      .regex(DOB_REGEX, 'Invalid DOB format eg: 20/01/2000'),
     nric: z
       .string({
         required_error: 'NRIC is required'

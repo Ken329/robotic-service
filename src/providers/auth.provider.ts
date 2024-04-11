@@ -2,16 +2,17 @@ import passport from 'passport';
 import { isEmpty } from 'lodash';
 import passportCustom from 'passport-custom';
 import { Request, Response, NextFunction } from 'express';
-import { ROLE } from '../utils/constant';
 import AuthService from '../services/authService';
 import UserService from '../services/userService';
 import { throwErrorsHttp } from '../utils/helpers';
+import { ROLE, USER_STATUS } from '../utils/constant';
 
 export const AUTH_STRATEGY = {
   APIKEY: 'apiKey',
-  PROSPECT: 'prospect',
+  STUDENT: 'student',
   ADMIN: 'admin',
-  CENTER: 'center'
+  CENTER: 'center',
+  APPROVED_STUDENT: 'approved_student'
 };
 
 const CustomStrategy = passportCustom.Strategy;
@@ -41,7 +42,7 @@ const verifyApiKey = async (req: Request, done: any) => {
   return done(null, req.user);
 };
 
-const verifyProspect = async (req: Request, done: any) => {
+const verifyStudent = async (req: Request, done: any) => {
   const token = req.get('Authorization');
 
   if (isEmpty(token)) return done(null, false);
@@ -55,7 +56,26 @@ const verifyProspect = async (req: Request, done: any) => {
     req.user = user;
     return done(null, req.user);
   } catch (error) {
-    console.log(error.message);
+    return done(null, false);
+  }
+};
+
+const verifyApprovedStudent = async (req: Request, done: any) => {
+  const token = req.get('Authorization');
+
+  if (isEmpty(token)) return done(null, false);
+
+  try {
+    const session = await AuthService.verifyUser(token);
+    const user = await UserService.user(session.sub, {
+      status: USER_STATUS.APPROVED
+    });
+
+    if (user.role !== ROLE.STUDENT) throwErrorsHttp('Role is not matched');
+
+    req.user = user;
+    return done(null, req.user);
+  } catch (error) {
     return done(null, false);
   }
 };
@@ -74,7 +94,6 @@ const verifyCenter = async (req: Request, done: any) => {
     req.user = user;
     return done(null, req.user);
   } catch (error) {
-    console.log(error.message);
     return done(null, false);
   }
 };
@@ -93,7 +112,6 @@ const verifyAdmin = async (req: Request, done: any) => {
     req.user = user;
     return done(null, req.user);
   } catch (error) {
-    console.log(error.message);
     return done(null, false);
   }
 };
@@ -103,9 +121,13 @@ const registerPassportPolicies = () => {
    * Register all the strategy here
    */
   passport.use(AUTH_STRATEGY.APIKEY, new CustomStrategy(verifyApiKey));
-  passport.use(AUTH_STRATEGY.PROSPECT, new CustomStrategy(verifyProspect));
+  passport.use(AUTH_STRATEGY.STUDENT, new CustomStrategy(verifyStudent));
   passport.use(AUTH_STRATEGY.ADMIN, new CustomStrategy(verifyAdmin));
   passport.use(AUTH_STRATEGY.CENTER, new CustomStrategy(verifyCenter));
+  passport.use(
+    AUTH_STRATEGY.APPROVED_STUDENT,
+    new CustomStrategy(verifyApprovedStudent)
+  );
 
   return passport.initialize();
 };

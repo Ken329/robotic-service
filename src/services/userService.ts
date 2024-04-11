@@ -1,23 +1,25 @@
-import { In } from 'typeorm';
-import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import { In, Not } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
+import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
 import DataSource from '../database/dataSource';
-import { decryption, throwErrorsHttp } from '../utils/helpers';
 import {
   ROLE,
   USER_STATUS,
   CENTER_STATUS,
-  RELATIONSHIP
+  RELATIONSHIP,
+  PAYMENT_METHOD
 } from '../utils/constant';
+import { decryption, throwErrorsHttp, maskingValue } from '../utils/helpers';
 import { User } from '../database/entity/User';
 import { Center } from '../database/entity/Center';
 
 type UserResponse = {
   id: string;
   status: string;
-  center: string;
+  centerId: string;
+  centerName: string;
   role: string;
   nric: string;
   passport: string;
@@ -33,6 +35,7 @@ type UserResponse = {
   relationship: string;
   parentEmail: string;
   parentContact: string;
+  paymentMethod: string;
 };
 
 class UserService {
@@ -46,20 +49,26 @@ class UserService {
 
   public async user(
     id: string,
-    option?: { status?: USER_STATUS; role?: ROLE }
+    option?: { status?: USER_STATUS; role?: ROLE; maskNric?: boolean }
   ): Promise<UserResponse> {
     const query = pick(option, ['status', 'role']);
     const user = await this.userRepository.findOne({
-      where: { id, ...query }
-      // relations: ['center']
+      where: { id, ...query },
+      relations: ['center']
     });
 
     if (!user) throwErrorsHttp('User not found', httpStatusCode.NOT_FOUND);
 
+    user.nric =
+      get(option, 'maskNric', true) && user.nric
+        ? maskingValue(user.nric)
+        : user.nric;
+
     return {
       id: user.id,
       status: user.status,
-      center: user.center,
+      centerId: get(user.center, 'id', null),
+      centerName: get(user.center, 'name', null),
       role: user.role,
       fullName: user.fullName,
       gender: user.gender,
@@ -74,11 +83,19 @@ class UserService {
       parentName: user.parentName,
       relationship: user.relationship,
       parentEmail: user.parentEmail,
-      parentContact: user.parentContact
+      parentContact: user.parentContact,
+      paymentMethod: user.paymentMethod
     };
   }
 
-  public async users(payload: { status?: USER_STATUS; role?: ROLE }): Promise<{
+  public async users(
+    payload: { status?: USER_STATUS; role?: ROLE },
+    userInfo: {
+      id: string;
+      role: ROLE;
+      centerId: string;
+    }
+  ): Promise<{
     totalUser: number;
     pendingCenter: any;
     pendingAdmin: any;
@@ -86,24 +103,27 @@ class UserService {
     rejected: any;
     data: UserResponse[];
   }> {
+    const where = {
+      id: Not(userInfo.id),
+      role: payload.role ? payload.role : In(Object.values(ROLE)),
+      status: payload.status ? payload.status : In(Object.values(USER_STATUS))
+    };
+    if (userInfo.role === ROLE.CENTER) set(where, 'center', userInfo.centerId);
     const users = await this.userRepository.find({
-      where: {
-        status: payload.status
-          ? payload.status
-          : In(Object.values(USER_STATUS)),
-        role: payload.role ? payload.role : In(Object.values(ROLE))
-      }
+      where,
+      relations: ['center']
     });
 
     const mappedUsers = map(users, (user) => ({
       id: user.id,
       status: user.status,
-      center: user.center,
+      centerId: get(user.center, 'id', null),
+      centerName: get(user.center, 'name', null),
       role: user.role,
       fullName: user.fullName,
       gender: user.gender,
       dob: user.dob,
-      nric: user.nric,
+      nric: maskingValue(user.nric),
       passport: user.passport,
       contact: user.contact,
       moeEmail: user.moeEmail,
@@ -113,7 +133,8 @@ class UserService {
       parentName: user.parentName,
       relationship: user.relationship,
       parentEmail: user.parentEmail,
-      parentContact: user.parentContact
+      parentContact: user.parentContact,
+      paymentMethod: user.paymentMethod
     }));
 
     const groupedUsers = groupBy(mappedUsers, 'status');
@@ -195,7 +216,7 @@ class UserService {
     user.passport = payload.passport;
     user.contact = payload.contact;
     user.race = payload.race;
-    user.fullName = payload.fullName;
+    user.fullName = payload.fullName.toLowerCase();
     user.gender = payload.gender;
     user.dob = payload.dob;
     user.moeEmail = payload.moeEmail;
@@ -216,7 +237,7 @@ class UserService {
       );
     }
 
-    return result;
+    return this.user(cognitoUser.id);
   }
 
   public async approve(
@@ -237,13 +258,15 @@ class UserService {
       relationship?: RELATIONSHIP;
       parentEmail?: string;
       parentContact?: string;
+      paymentMethod?: PAYMENT_METHOD;
     }
   ): Promise<UserResponse> {
     const user = await this.user(id, {
       status:
         role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
-          : USER_STATUS.PENDING_ADMIN
+          : USER_STATUS.PENDING_ADMIN,
+      maskNric: false
     });
 
     const filterPayload = pick(payload, [
@@ -292,12 +315,22 @@ class UserService {
       }
     }
 
-    set(
-      filterPayload,
-      'status',
-      role === ROLE.CENTER ? USER_STATUS.PENDING_ADMIN : USER_STATUS.APPROVED
+    if (role === ROLE.CENTER && !payload.paymentMethod)
+      throwErrorsHttp('Payment method is required', httpStatusCode.BAD_REQUEST);
+
+    if (payload.paymentMethod)
+      set(filterPayload, 'paymentMethod', payload.paymentMethod);
+
+    await this.userRepository.update(
+      { id },
+      {
+        ...filterPayload,
+        status:
+          user.status === USER_STATUS.PENDING_CENTER
+            ? USER_STATUS.PENDING_ADMIN
+            : USER_STATUS.APPROVED
+      }
     );
-    await this.userRepository.update({ id }, { ...filterPayload });
     return this.user(id);
   }
 

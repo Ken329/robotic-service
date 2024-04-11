@@ -8,21 +8,11 @@ import {
 const generatePublicKey = (req: Request, res: Response) => {
   try {
     const publicKey = getPublicKey();
-    return successApiResponse(
-      res,
-      'Successfully generate public key',
-      'Auth Controller',
-      'Generate Public Key',
-      { publicKey }
-    );
+    return successApiResponse(res, 'Successfully generate public key', {
+      publicKey
+    });
   } catch (error) {
-    return errorApiResponse(
-      res,
-      'Failed generate public key',
-      'Auth Controller',
-      'Generate Public Key',
-      error.message
-    );
+    return errorApiResponse(res, error.message);
   }
 };
 

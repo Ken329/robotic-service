@@ -6,7 +6,8 @@ import {
   USER_STATUS,
   NRIC_REGEX,
   RELATIONSHIP,
-  CONTACT_REGEX
+  CONTACT_REGEX,
+  PAYMENT_METHOD
 } from '../utils/constant';
 
 const emptyStringToNull = z.literal('').transform(() => null);
@@ -50,13 +51,13 @@ const signUp = z.object({
       required_error: 'Full name is required'
     }),
     gender: z.enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
-      required_error: 'Relationship is required'
+      required_error: 'Gender is required'
     }),
     dob: z
       .string({
         required_error: 'Date of Birth is required'
       })
-      .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000'),
+      .regex(DOB_REGEX, 'Invalid DOB format eg: 20/01/2000'),
     nric: z
       .string({
         required_error: 'NRIC is required'
@@ -180,6 +181,19 @@ const centerCreation = z.object({
 
 const approval = z.object({
   body: z.object({
+    paymentMethod: z
+      .enum(
+        [
+          PAYMENT_METHOD.CASH,
+          PAYMENT_METHOD.CREDIT_CARD,
+          PAYMENT_METHOD.BANK_TRANSFER
+        ],
+        {
+          required_error: 'Payment method is required'
+        }
+      )
+      .optional()
+      .or(emptyStringToNull),
     nric: z
       .string({
         required_error: 'NRIC is required'
@@ -195,7 +209,7 @@ const approval = z.object({
       .or(emptyStringToNull),
     gender: z
       .enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
-        required_error: 'Relationship is required'
+        required_error: 'Gender is required'
       })
       .optional()
       .or(emptyStringToNull),

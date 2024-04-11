@@ -30,6 +30,12 @@ export enum GENDER {
   OTHERS = 'others'
 }
 
+export enum PAYMENT_METHOD {
+  CASH = 'cash',
+  CREDIT_CARD = 'credit card',
+  BANK_TRANSFER = 'bank transfer'
+}
+
 export const CONTACT_REGEX = new RegExp(
   /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$/
 );
@@ -39,5 +45,5 @@ export const NRIC_REGEX = new RegExp(
 );
 
 export const DOB_REGEX = new RegExp(
-  /(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d/
+  /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/
 );

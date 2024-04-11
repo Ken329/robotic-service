@@ -22,14 +22,7 @@ export const validate =
         errors,
         (error) => `${error.path.join('.')}: ${error.message}`
       );
-      return errorApiResponse(
-        res,
-        message,
-        'Validation',
-        'Request Validation',
-        'Validation Error',
-        httpStatusCode.BAD_REQUEST
-      );
+      return errorApiResponse(res, message, httpStatusCode.BAD_REQUEST);
     }
   };
 

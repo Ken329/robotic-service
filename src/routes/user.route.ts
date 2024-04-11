@@ -8,7 +8,7 @@ const route: Application = Express();
 route.get(
   '/api/user',
   authenticate([
-    AUTH_STRATEGY.PROSPECT,
+    AUTH_STRATEGY.STUDENT,
     AUTH_STRATEGY.ADMIN,
     AUTH_STRATEGY.CENTER
   ]),

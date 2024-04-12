@@ -216,7 +216,7 @@ class UserService {
     user.passport = payload.passport;
     user.contact = payload.contact;
     user.race = payload.race;
-    user.fullName = payload.fullName.toLowerCase();
+    user.fullName = payload.fullName ? payload.fullName.toLowerCase() : null;
     user.gender = payload.gender;
     user.dob = payload.dob;
     user.moeEmail = payload.moeEmail;

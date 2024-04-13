@@ -1,3 +1,4 @@
+import cors from 'cors';
 import * as dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import Express, { Application } from 'express';
@@ -16,6 +17,7 @@ const port: string = process.env.PORT || '8080';
 
 app.use(bodyParser.json());
 app.use(authProvider.registerPassportPolicies());
+app.use(cors({ origin: `${process.env.ALLOW_ORIGIN}`.split(',') }));
 
 console.log('===================== Starting Server =====================');
 

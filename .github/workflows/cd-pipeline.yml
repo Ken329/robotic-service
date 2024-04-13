@@ -1,8 +1,8 @@
-name: Robotic Portal CD Pipeline
+name: Robotic Service CD Pipeline
 
 on:
   workflow_run:
-    workflows: ['Robotic Portal CI Pipeline']
+    workflows: ['Robotic Service CI Pipeline']
     types:
       - completed
 

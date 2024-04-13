@@ -1,4 +1,4 @@
-name: Robotic Portal CI Pipeline
+name: Robotic Service CI Pipeline
 
 on:
   push:

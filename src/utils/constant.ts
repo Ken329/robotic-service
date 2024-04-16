@@ -1,11 +1,7 @@
 /* eslint-disable no-unused-vars */
 
-export enum CENTER_STATUS {
-  NOT_ASSIGN = 'Not Assign',
-  ASSIGNED = 'Assigned'
-}
-
 export enum USER_STATUS {
+  PENDING_VERIFICATION = 'pending verification',
   PENDING_CENTER = 'pending center',
   PENDING_ADMIN = 'pending admin',
   APPROVED = 'approved',
@@ -28,12 +24,6 @@ export enum GENDER {
   MALE = 'male',
   FEMALE = 'female',
   OTHERS = 'others'
-}
-
-export enum PAYMENT_METHOD {
-  CASH = 'cash',
-  CREDIT_CARD = 'credit card',
-  BANK_TRANSFER = 'bank transfer'
 }
 
 export const CONTACT_REGEX = new RegExp(

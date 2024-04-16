@@ -2,6 +2,7 @@ import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import { Response } from 'express';
 import httpStatusCode from 'http-status-codes';
+import { isEmpty, set } from 'lodash';
 
 interface ErrorWithStatus extends Error {
   status: number;
@@ -45,14 +46,16 @@ export const maskingValue = (value: string) => {
 export const successApiResponse = (
   res: Response,
   message: string,
-  payload: object | object[] | string,
+  payload?: object | object[] | string,
   statusCode = httpStatusCode.OK
-) =>
-  res.status(statusCode).json({
+) => {
+  const response = {
     success: true,
-    message,
-    data: payload
-  });
+    message
+  };
+  if (!isEmpty(payload)) set(response, 'data', payload);
+  return res.status(statusCode).json(response);
+};
 
 export const errorApiResponse = (
   res: Response,

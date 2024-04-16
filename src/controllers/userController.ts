@@ -1,25 +1,29 @@
+import { get, pick } from 'lodash';
 import { Request, Response } from 'express';
+import { ROLE } from '../utils/constant';
 import UserService from '../services/userService';
-import { ROLE, USER_STATUS } from '../utils/constant';
-import AwsCognitoService from '../services/awsCognitoService';
+import CenterService from '../services/centerService';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
-import { get } from 'lodash';
 
 const user = async (req: Request, res: Response) =>
   successApiResponse(res, 'Successfully get user', req.user);
 
-const users = async (req: Request, res: Response) =>
-  UserService.users(req.query, {
-    id: get(req.user, 'id'),
+const getUser = async (req: Request, res: Response) =>
+  UserService.user(req.params.id, pick(req.user, ['centerId']))
+    .then((data) => successApiResponse(res, 'Successfully get user info', data))
+    .catch((error) => errorApiResponse(res, error.message));
+
+const getStudents = async (req: Request, res: Response) =>
+  UserService.users(ROLE.STUDENT, req.query, {
     role: get(req.user, 'role'),
     centerId: get(req.user, 'centerId')
   })
     .then((data) =>
-      successApiResponse(res, 'Successfully get list of users', data)
+      successApiResponse(res, 'Successfully get list of students', data)
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-const signUp = async (req: Request, res: Response) =>
+const createStudent = async (req: Request, res: Response) =>
   UserService.create(req.body.email, req.body.password, {
     ...req.body,
     role: ROLE.STUDENT
@@ -27,37 +31,49 @@ const signUp = async (req: Request, res: Response) =>
     .then((data) =>
       successApiResponse(res, 'Successfully signed up', {
         id: data.id,
-        email: req.body.email,
+        role: data.role,
         status: data.status,
+        email: req.body.email,
+        centerId: data.centerId,
         centerName: data.centerName,
-        role: data.role
+        centerLocation: data.centerLocation
       })
     )
     .catch((error) => {
       return errorApiResponse(res, error.message);
     });
 
-const createCenter = async (req: Request, res: Response) =>
-  UserService.create(req.body.email, req.body.password, {
-    role: ROLE.CENTER,
-    status: USER_STATUS.APPROVED,
-    center: req.body.center
-  })
+const getCenters = async (req: Request, res: Response) =>
+  UserService.users(ROLE.CENTER, req.query)
     .then((data) =>
-      successApiResponse(res, 'Successfully create center', {
-        id: data.id,
-        email: req.body.email,
-        status: data.status,
-        centerName: data.centerName,
-        role: data.role
-      })
+      successApiResponse(res, 'Successfully get list of centers', data)
     )
     .catch((error) => errorApiResponse(res, error.message));
 
+const createCenter = async (req: Request, res: Response) => {
+  try {
+    const center = await CenterService.create(req.body);
+    const data = await UserService.create(req.body.email, req.body.password, {
+      role: ROLE.CENTER,
+      center: center.id
+    });
+    return successApiResponse(res, 'Successfully create center', {
+      id: data.id,
+      role: data.role,
+      status: data.status,
+      email: req.body.email,
+      centerId: data.centerId,
+      centerName: data.centerName,
+      centerLocation: data.centerLocation
+    });
+  } catch (error) {
+    return errorApiResponse(res, error.message);
+  }
+};
+
 const createAdmin = async (req: Request, res: Response) =>
   UserService.create(req.body.email, req.body.password, {
-    role: ROLE.ADMIN,
-    status: USER_STATUS.APPROVED
+    role: ROLE.ADMIN
   })
     .then((data) =>
       successApiResponse(res, 'Successfully create admin', {
@@ -69,15 +85,8 @@ const createAdmin = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-const confirmSignUp = async (req: Request, res: Response) =>
-  AwsCognitoService.confirmedSignUp(req.body.email, req.body.code)
-    .then((data) =>
-      successApiResponse(res, 'Successfully confirm signed up', data)
-    )
-    .catch((error) => errorApiResponse(res, error.message));
-
 const signUpApproval = async (req: Request, res: Response) =>
-  UserService.approve(req.params.id, get(req, 'user.role'), req.body)
+  UserService.approve(req.params.id, req.body, req.user)
     .then((data) =>
       successApiResponse(
         res,
@@ -100,11 +109,12 @@ const signUpReject = async (req: Request, res: Response) =>
 
 export default {
   user,
-  users,
-  signUp,
+  getUser,
+  getStudents,
+  createStudent,
+  getCenters,
   createCenter,
   createAdmin,
-  confirmSignUp,
   signUpApproval,
   signUpReject
 };

@@ -2,8 +2,8 @@ import { get, map } from 'lodash';
 import { z, AnyZodObject } from 'zod';
 import httpStatusCode from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
+import AuthValidators from './authValidators';
 import UserValidators from './userValidators';
-import CenterValidators from './centerValidators';
 import { errorApiResponse } from '../utils/helpers';
 
 export const validate =
@@ -36,4 +36,4 @@ const ParamsId = z.object({
   })
 });
 
-export default { ParamsId, UserValidators, CenterValidators };
+export default { ParamsId, AuthValidators, UserValidators };

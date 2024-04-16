@@ -5,7 +5,6 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { CENTER_STATUS } from '../../utils/constant';
 
 @Entity()
 export class Center {
@@ -14,9 +13,6 @@ export class Center {
 
   @Column({ nullable: false })
   name: string;
-
-  @Column({ type: 'varchar', enum: CENTER_STATUS, nullable: false })
-  status: string;
 
   @Column({ nullable: false })
   location: string;

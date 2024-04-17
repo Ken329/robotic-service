@@ -1,8 +1,8 @@
 import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import { Response } from 'express';
+import { get, isEmpty, set } from 'lodash';
 import httpStatusCode from 'http-status-codes';
-import { isEmpty, set } from 'lodash';
 
 interface ErrorWithStatus extends Error {
   status: number;
@@ -46,14 +46,18 @@ export const maskingValue = (value: string) => {
 export const successApiResponse = (
   res: Response,
   message: string,
-  payload?: object | object[] | string,
+  payload?: any,
   statusCode = httpStatusCode.OK
 ) => {
   const response = {
     success: true,
     message
   };
-  if (!isEmpty(payload)) set(response, 'data', payload);
+  if (!isEmpty(payload)) {
+    const nric = get(payload, 'nric', null);
+    if (nric) set(payload, 'nric', maskingValue(nric));
+    set(response, 'data', payload);
+  }
   return res.status(statusCode).json(response);
 };
 

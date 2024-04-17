@@ -1,10 +1,12 @@
 import {
   Entity,
   Column,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
+import { User } from './User';
 
 @Entity()
 export class Center {
@@ -22,4 +24,7 @@ export class Center {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => User, (user) => user.center)
+  user: User;
 }

@@ -1,5 +1,6 @@
 import { map, pick } from 'lodash';
 import DataSource from '../database/dataSource';
+import { USER_STATUS } from '../utils/constant';
 import { Center } from '../database/entity/Center';
 
 type CenterResponse = {
@@ -22,7 +23,10 @@ class UserService {
   }
 
   public async centers(): Promise<CenterResponse[]> {
-    const results = await this.centerRepository.find();
+    const results = await this.centerRepository.find({
+      where: { user: { status: USER_STATUS.APPROVED } },
+      relations: ['user']
+    });
     return map(results, (result) => pick(result, ['id', 'name', 'location']));
   }
 

@@ -23,11 +23,15 @@ const getStudents = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
+const getCenters = async (req: Request, res: Response) =>
+  UserService.users(ROLE.CENTER, req.query)
+    .then((data) =>
+      successApiResponse(res, 'Successfully get list of centers', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 const createStudent = async (req: Request, res: Response) =>
-  UserService.create(req.body.email, req.body.password, {
-    ...req.body,
-    role: ROLE.STUDENT
-  })
+  UserService.create(req.body.email, req.body.password, ROLE.STUDENT, req.body)
     .then((data) =>
       successApiResponse(res, 'Successfully signed up', {
         id: data.id,
@@ -43,20 +47,17 @@ const createStudent = async (req: Request, res: Response) =>
       return errorApiResponse(res, error.message);
     });
 
-const getCenters = async (req: Request, res: Response) =>
-  UserService.users(ROLE.CENTER, req.query)
-    .then((data) =>
-      successApiResponse(res, 'Successfully get list of centers', data)
-    )
-    .catch((error) => errorApiResponse(res, error.message));
-
 const createCenter = async (req: Request, res: Response) => {
   try {
     const center = await CenterService.create(req.body);
-    const data = await UserService.create(req.body.email, req.body.password, {
-      role: ROLE.CENTER,
-      center: center.id
-    });
+    const data = await UserService.create(
+      req.body.email,
+      req.body.password,
+      ROLE.CENTER,
+      {
+        center: center.id
+      }
+    );
     return successApiResponse(res, 'Successfully create center', {
       id: data.id,
       role: data.role,
@@ -72,9 +73,7 @@ const createCenter = async (req: Request, res: Response) => {
 };
 
 const createAdmin = async (req: Request, res: Response) =>
-  UserService.create(req.body.email, req.body.password, {
-    role: ROLE.ADMIN
-  })
+  UserService.create(req.body.email, req.body.password, ROLE.ADMIN)
     .then((data) =>
       successApiResponse(res, 'Successfully create admin', {
         id: data.id,

@@ -3,10 +3,9 @@ import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
 import DataSource from '../database/dataSource';
+import { decryption, throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS, RELATIONSHIP } from '../utils/constant';
-import { decryption, throwErrorsHttp, maskingValue } from '../utils/helpers';
 import { User } from '../database/entity/User';
-import { Center } from '../database/entity/Center';
 import { Student } from '../database/entity/Student';
 
 type UserResponse = {
@@ -34,14 +33,30 @@ type UserResponse = {
   rejectedBy?: string;
 };
 
+type StudentInfo = {
+  center?: string;
+  nric?: string;
+  passport?: string;
+  fullName?: string;
+  gender?: string;
+  dob?: string;
+  contact?: string;
+  race?: string;
+  moeEmail?: string;
+  school?: string;
+  nationality?: string;
+  parentName?: string;
+  relationship?: RELATIONSHIP;
+  parentEmail?: string;
+  parentContact?: string;
+};
+
 class UserService {
   private userRepository;
-  private centerRepository;
   private studentRepository;
 
   constructor() {
     this.userRepository = DataSource.getRepository(User);
-    this.centerRepository = DataSource.getRepository(Center);
     this.studentRepository = DataSource.getRepository(Student);
   }
 
@@ -74,7 +89,7 @@ class UserService {
           fullName: user.student.fullName,
           gender: user.student.gender,
           dob: user.student.dob,
-          nric: maskingValue(user.student.nric),
+          nric: user.student.nric,
           passport: user.student.passport,
           contact: user.student.contact,
           moeEmail: user.student.moeEmail,
@@ -146,35 +161,16 @@ class UserService {
   public async create(
     email: string,
     password: string,
-    payload: {
-      role: ROLE;
-      nric?: string;
-      passport?: string;
-      fullName?: string;
-      gender?: string;
-      dob?: string;
-      contact?: string;
-      race?: string;
-      moeEmail?: string;
-      school?: string;
-      nationality?: string;
-      parentName?: string;
-      relationship?: RELATIONSHIP;
-      parentEmail?: string;
-      parentContact?: string;
-      center?: string;
-    }
+    role: ROLE,
+    payload?: StudentInfo
   ): Promise<UserResponse> {
     const center = await CenterService.center(payload.center);
 
-    if (
-      (payload.role === ROLE.CENTER || payload.role === ROLE.STUDENT) &&
-      !center
-    ) {
+    if ((role === ROLE.CENTER || role === ROLE.STUDENT) && !center) {
       throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
     }
 
-    if (payload.role === ROLE.STUDENT) {
+    if (role === ROLE.STUDENT) {
       if (payload.nationality === 'malaysia' && isEmpty(payload.nric)) {
         throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
       } else if (
@@ -195,13 +191,13 @@ class UserService {
       const user = new User();
       user.id = cognitoUser.id;
       user.email = cognitoUser.email;
-      user.role = payload.role;
+      user.role = role;
       user.status = USER_STATUS.PENDING_VERIFICATION;
       user.center = payload.center;
 
       const result = await this.userRepository.save(user);
 
-      if (payload.role === ROLE.STUDENT) {
+      if (role === ROLE.STUDENT) {
         const student = new Student();
         student.user = result.id;
         student.nric = payload.nric;
@@ -235,22 +231,7 @@ class UserService {
 
   public async approve(
     id: string,
-    payload: {
-      nric?: string;
-      passport?: string;
-      fullName?: string;
-      gender?: string;
-      dob?: string;
-      contact?: string;
-      race?: string;
-      moeEmail?: string;
-      school?: string;
-      nationality?: string;
-      parentName?: string;
-      relationship?: RELATIONSHIP;
-      parentEmail?: string;
-      parentContact?: string;
-    },
+    payload: StudentInfo,
     userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
     const where = {
@@ -307,18 +288,21 @@ class UserService {
       }
     }
 
-    await this.update(
-      id,
+    const updatedStatus =
       user.status === USER_STATUS.PENDING_CENTER
         ? USER_STATUS.PENDING_ADMIN
-        : USER_STATUS.APPROVED
-    );
+        : USER_STATUS.APPROVED;
+    await this.update(id, updatedStatus);
     await this.studentRepository.update({ user: id }, filterPayload);
-    return this.user(id);
+    return {
+      ...user,
+      status: updatedStatus,
+      ...filterPayload
+    };
   }
 
   public async reject(id: string, role: ROLE): Promise<UserResponse> {
-    await this.user(id, {
+    const user = await this.user(id, {
       status:
         role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
@@ -327,7 +311,11 @@ class UserService {
 
     await this.userRepository.update({ id }, { status: USER_STATUS.REJECT });
     await this.studentRepository.update({ user: id }, { rejectedBy: role });
-    return this.user(id);
+    return {
+      ...user,
+      status: USER_STATUS.REJECT,
+      rejectedBy: role
+    };
   }
 }
 

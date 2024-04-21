@@ -1,5 +1,5 @@
 import fs from 'fs';
-import nodeRsa from 'node-rsa';
+import crypto from 'crypto';
 import { Response } from 'express';
 import { get, isEmpty, set } from 'lodash';
 import httpStatusCode from 'http-status-codes';
@@ -18,24 +18,27 @@ export const getPublicKey = () =>
   fs.readFileSync(process.env.PUBLIC_KEY_PATH, 'utf8');
 
 export const encryption = (payload: string) => {
-  try {
-    const rsaEncryption = new nodeRsa(getPublicKey());
-    const encryptedData = rsaEncryption.encrypt(payload, 'base64');
-    return encryptedData;
-  } catch (error) {
-    throwErrorsHttp('Invalid encryption key path', httpStatusCode.NOT_FOUND);
-  }
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    process.env.APP_KEY,
+    process.env.APP_IV
+  );
+
+  let encryptedText = cipher.update(payload, 'utf-8', 'hex');
+  encryptedText += cipher.final('hex');
+  return encryptedText;
 };
 
 export const decryption = (payload: string) => {
-  try {
-    const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
-    const rsaDecryption = new nodeRsa(privateKey);
-    const encryptedData = rsaDecryption.decrypt(payload, 'utf8');
-    return encryptedData;
-  } catch (error) {
-    throwErrorsHttp('Invalid decryption key path', httpStatusCode.NOT_FOUND);
-  }
+  const decipher = crypto.createDecipheriv(
+    'aes-256-cbc',
+    process.env.APP_KEY,
+    process.env.APP_IV
+  );
+
+  let decryptedText = decipher.update(payload, 'hex', 'utf-8');
+  decryptedText += decipher.final('utf-8');
+  return decryptedText;
 };
 
 export const maskingValue = (value: string) => {

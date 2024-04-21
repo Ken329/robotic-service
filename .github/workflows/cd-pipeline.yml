@@ -14,11 +14,11 @@ jobs:
       - name: Setting up environment variables
         run: |
           touch .env
-          echo "${{ secrets.UAT_ENV_FILE }}" > .env
+          echo "${{ secrets.ENV_FILE }}" > .env
           touch encryption-public-key.pem
-          echo "${{ secrets.UAT_ENCRYPTION_PUBLIC_KEY }}" > encryption-public-key.pem
+          echo "${{ secrets.ENCRYPTION_PUBLIC_KEY }}" > encryption-public-key.pem
           touch encryption-private-key.pem
-          echo "${{ secrets.UAT_ENCRYPTION_PRIVATE_KEY }}" > encryption-private-key.pem
+          echo "${{ secrets.ENCRYPTION_PRIVATE_KEY }}" > encryption-private-key.pem
 
       - name: Pull Docker Image
         run: sudo docker pull kenliau0329/robotic-backend:latest

@@ -17,9 +17,21 @@ const generatePublicKey = (req: Request, res: Response) => {
   }
 };
 
+const generateToken = (req: Request, res: Response) =>
+  AuthService.generateToken(req.body.accessToken)
+    .then((data) =>
+      successApiResponse(res, 'Successfully generate token', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 const verifyOtp = async (req: Request, res: Response) =>
   AuthService.verifyOtp(req.body.id, req.body.code)
     .then(() => successApiResponse(res, 'Successfully verify otp'))
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { generatePublicKey, verifyOtp };
+const refreshToken = (req: Request, res: Response) =>
+  AuthService.refreshToken(req.body.refreshToken)
+    .then((data) => successApiResponse(res, 'Successfully refresh token', data))
+    .catch((error) => errorApiResponse(res, error.message));
+
+export default { generatePublicKey, generateToken, verifyOtp, refreshToken };

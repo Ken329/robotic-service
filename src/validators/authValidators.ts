@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+const generateToken = z.object({
+  body: z.object({
+    accessToken: z.string({
+      required_error: 'Access token is required'
+    })
+  })
+});
+
 const verifyOtp = z.object({
   body: z.object({
     id: z
@@ -15,6 +23,16 @@ const verifyOtp = z.object({
   })
 });
 
+const refreshToken = z.object({
+  body: z.object({
+    refreshToken: z.string({
+      required_error: 'Access token is required'
+    })
+  })
+});
+
 export default {
-  verifyOtp
+  generateToken,
+  verifyOtp,
+  refreshToken
 };

@@ -1,14 +1,16 @@
+import fs from 'fs';
+import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
 import DataSource from '../database/dataSource';
-import { decryption, throwErrorsHttp } from '../utils/helpers';
+import { throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS, RELATIONSHIP } from '../utils/constant';
 import { User } from '../database/entity/User';
 import { Student } from '../database/entity/Student';
 
-type UserResponse = {
+export type UserResponse = {
   id: string;
   email: string;
   role: string;
@@ -164,7 +166,8 @@ class UserService {
     role: ROLE,
     payload?: StudentInfo
   ): Promise<UserResponse> {
-    const center = await CenterService.center(payload.center);
+    const centerId = get(payload, 'center', null);
+    const center = await CenterService.center(centerId);
 
     if ((role === ROLE.CENTER || role === ROLE.STUDENT) && !center) {
       throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
@@ -182,7 +185,9 @@ class UserService {
     }
 
     try {
-      const decryptedPassword = decryption(password);
+      const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
+      const rsaDecryption = new nodeRsa(privateKey);
+      const decryptedPassword = rsaDecryption.decrypt(password, 'utf8');
       const cognitoUser = await AwsCognitoService.signUp(
         email,
         decryptedPassword
@@ -193,7 +198,7 @@ class UserService {
       user.email = cognitoUser.email;
       user.role = role;
       user.status = USER_STATUS.PENDING_VERIFICATION;
-      user.center = payload.center;
+      user.center = centerId;
 
       const result = await this.userRepository.save(user);
 
@@ -219,7 +224,7 @@ class UserService {
 
       return this.user(result.id);
     } catch (error) {
-      CenterService.delete(center.id);
+      CenterService.delete(centerId);
       throw new Error(error.message);
     }
   }

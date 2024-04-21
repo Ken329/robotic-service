@@ -16,16 +16,30 @@ route.get(
 );
 
 route.get(
-  '/api/users',
+  '/api/user/students',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
-  validate(Validators.UserValidators.users),
-  UserController.users
+  validate(Validators.UserValidators.getUsers),
+  UserController.getStudents
+);
+
+route.get(
+  '/api/user/centers',
+  authenticate([AUTH_STRATEGY.ADMIN]),
+  validate(Validators.UserValidators.getUsers),
+  UserController.getCenters
+);
+
+route.get(
+  '/api/user/:id',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.ParamsId),
+  UserController.getUser
 );
 
 route.post(
   '/api/user/student',
-  validate(Validators.UserValidators.signUp),
-  UserController.signUp
+  validate(Validators.UserValidators.studentCreation),
+  UserController.createStudent
 );
 
 route.post(
@@ -43,15 +57,6 @@ route.post(
   authenticate(AUTH_STRATEGY.APIKEY),
   validate(Validators.UserValidators.adminCreation),
   UserController.createAdmin
-);
-
-/**
- * Verify OTP for all account creation
- */
-route.post(
-  '/api/user/verify-otp',
-  validate(Validators.UserValidators.confirmSignUp),
-  UserController.confirmSignUp
 );
 
 /**

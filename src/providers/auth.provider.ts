@@ -3,7 +3,6 @@ import { isEmpty } from 'lodash';
 import passportCustom from 'passport-custom';
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/authService';
-import UserService from '../services/userService';
 import { throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS } from '../utils/constant';
 
@@ -33,7 +32,7 @@ export const authenticate =
 const verifyApiKey = async (req: Request, done: any) => {
   const apiKey = req.get('x-api-key');
 
-  if (isEmpty(apiKey) || apiKey !== process.env.API_KEY)
+  if (isEmpty(apiKey) || apiKey !== process.env.APP_KEY)
     return done(null, false);
 
   req.user = {
@@ -48,8 +47,7 @@ const verifyStudent = async (req: Request, done: any) => {
   if (isEmpty(token)) return done(null, false);
 
   try {
-    const session = await AuthService.verifyUser(token);
-    const user = await UserService.user(session.sub);
+    const user = await AuthService.verifyToken(token);
 
     if (user.role !== ROLE.STUDENT) throwErrorsHttp('Role is not matched');
 
@@ -66,8 +64,7 @@ const verifyApprovedStudent = async (req: Request, done: any) => {
   if (isEmpty(token)) return done(null, false);
 
   try {
-    const session = await AuthService.verifyUser(token);
-    const user = await UserService.user(session.sub, {
+    const user = await AuthService.verifyToken(token, {
       status: USER_STATUS.APPROVED
     });
 
@@ -86,8 +83,7 @@ const verifyCenter = async (req: Request, done: any) => {
   if (isEmpty(token)) return done(null, false);
 
   try {
-    const session = await AuthService.verifyUser(token);
-    const user = await UserService.user(session.sub);
+    const user = await AuthService.verifyToken(token);
 
     if (user.role !== ROLE.CENTER) throwErrorsHttp('Role is not matched');
 
@@ -104,8 +100,7 @@ const verifyAdmin = async (req: Request, done: any) => {
   if (isEmpty(token)) return done(null, false);
 
   try {
-    const session = await AuthService.verifyUser(token);
-    const user = await UserService.user(session.sub);
+    const user = await AuthService.verifyToken(token);
 
     if (user.role !== ROLE.ADMIN) throwErrorsHttp('Role is not matched');
 

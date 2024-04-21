@@ -1,80 +1,42 @@
 import {
   Entity,
   Column,
+  OneToOne,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { Center } from './Center';
-import {
-  ROLE,
-  GENDER,
-  USER_STATUS,
-  RELATIONSHIP,
-  PAYMENT_METHOD
-} from '../../utils/constant';
+import { Student } from './Student';
+import { ROLE, USER_STATUS } from '../../utils/constant';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', enum: USER_STATUS, nullable: false })
-  status: string;
+  @Column({ nullable: false, unique: true })
+  email: string;
 
   @Column({ type: 'varchar', enum: ROLE, nullable: false })
   role: string;
 
-  @ManyToOne(() => Center, (center) => center.id)
+  @Column({ type: 'varchar', enum: USER_STATUS, nullable: false })
+  status: string;
+
+  @ManyToOne(() => Center, (center) => center.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'center' })
   @Column({ type: 'uuid', nullable: true })
   center: string;
 
-  @Column({ nullable: true })
-  nric: string;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @Column({ nullable: true })
-  passport: string;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-  @Column({ nullable: true })
-  fullName: string;
-
-  @Column({ type: 'varchar', enum: GENDER, nullable: true })
-  gender: string;
-
-  @Column({ nullable: true })
-  dob: string;
-
-  @Column({ nullable: true })
-  contact: string;
-
-  @Column({ nullable: true })
-  moeEmail: string;
-
-  @Column({ nullable: true })
-  race: string;
-
-  @Column({ nullable: true })
-  school: string;
-
-  @Column({ nullable: true })
-  nationality: string;
-
-  @Column({ nullable: true })
-  parentName: string;
-
-  @Column({ type: 'varchar', enum: RELATIONSHIP, nullable: true })
-  relationship: string;
-
-  @Column({ nullable: true })
-  parentEmail: string;
-
-  @Column({ nullable: true })
-  parentContact: string;
-
-  @Column({ type: 'varchar', enum: PAYMENT_METHOD, nullable: true })
-  paymentMethod: string;
-
-  @Column({ type: 'varchar', enum: ROLE, nullable: true })
-  rejectedBy: string;
+  @OneToOne(() => Student, (student) => student.user)
+  student: Student;
 }

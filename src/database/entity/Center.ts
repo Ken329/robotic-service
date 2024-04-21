@@ -1,11 +1,12 @@
 import {
   Entity,
   Column,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { CENTER_STATUS } from '../../utils/constant';
+import { User } from './User';
 
 @Entity()
 export class Center {
@@ -15,9 +16,6 @@ export class Center {
   @Column({ nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', enum: CENTER_STATUS, nullable: false })
-  status: string;
-
   @Column({ nullable: false })
   location: string;
 
@@ -26,4 +24,7 @@ export class Center {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => User, (user) => user.center)
+  user: User;
 }

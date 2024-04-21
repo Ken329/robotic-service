@@ -1,154 +1,161 @@
-import { In, Not } from 'typeorm';
+import fs from 'fs';
+import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import CenterService from './centerService';
 import AwsCognitoService from './awsCognitoService';
 import DataSource from '../database/dataSource';
-import {
-  ROLE,
-  USER_STATUS,
-  CENTER_STATUS,
-  RELATIONSHIP,
-  PAYMENT_METHOD
-} from '../utils/constant';
-import { decryption, throwErrorsHttp, maskingValue } from '../utils/helpers';
+import { throwErrorsHttp } from '../utils/helpers';
+import { ROLE, USER_STATUS, RELATIONSHIP } from '../utils/constant';
 import { User } from '../database/entity/User';
-import { Center } from '../database/entity/Center';
+import { Student } from '../database/entity/Student';
 
-type UserResponse = {
+export type UserResponse = {
   id: string;
-  status: string;
-  centerId: string;
-  centerName: string;
+  email: string;
   role: string;
-  nric: string;
-  passport: string;
-  fullName: string;
-  gender: string;
-  dob: string;
-  contact: string;
-  moeEmail: string;
-  race: string;
-  school: string;
-  nationality: string;
-  parentName: string;
-  relationship: string;
-  parentEmail: string;
-  parentContact: string;
-  paymentMethod: string;
+  status: string;
+  centerId?: string;
+  centerName?: string;
+  centerLocation?: string;
+  fullName?: string;
+  gender?: string;
+  dob?: string;
+  nric?: string;
+  passport?: string;
+  contact?: string;
+  moeEmail?: string;
+  race?: string;
+  school?: string;
+  nationality?: string;
+  parentName?: string;
+  relationship?: string;
+  parentEmail?: string;
+  parentContact?: string;
+  rejectedBy?: string;
+};
+
+type StudentInfo = {
+  center?: string;
+  nric?: string;
+  passport?: string;
+  fullName?: string;
+  gender?: string;
+  dob?: string;
+  contact?: string;
+  race?: string;
+  moeEmail?: string;
+  school?: string;
+  nationality?: string;
+  parentName?: string;
+  relationship?: RELATIONSHIP;
+  parentEmail?: string;
+  parentContact?: string;
 };
 
 class UserService {
   private userRepository;
-  private centerRepository;
+  private studentRepository;
 
   constructor() {
     this.userRepository = DataSource.getRepository(User);
-    this.centerRepository = DataSource.getRepository(Center);
+    this.studentRepository = DataSource.getRepository(Student);
   }
 
   public async user(
     id: string,
-    option?: { status?: USER_STATUS; role?: ROLE; maskNric?: boolean }
+    option?: { status?: USER_STATUS; centerId?: string }
   ): Promise<UserResponse> {
-    const query = pick(option, ['status', 'role']);
+    const query = pick(option, ['status', 'centerId']);
+    if (query.centerId) {
+      set(query, 'center', query.centerId);
+      delete query.centerId;
+    }
     const user = await this.userRepository.findOne({
       where: { id, ...query },
-      relations: ['center']
+      relations: ['center', 'student']
     });
 
     if (!user) throwErrorsHttp('User not found', httpStatusCode.NOT_FOUND);
 
-    user.nric =
-      get(option, 'maskNric', true) && user.nric
-        ? maskingValue(user.nric)
-        : user.nric;
+    const centerDetails = user.center
+      ? {
+          centerId: get(user.center, 'id'),
+          centerName: get(user.center, 'name'),
+          centerLocation: get(user.center, 'location')
+        }
+      : {};
+
+    const studentDetails = user.student
+      ? {
+          fullName: user.student.fullName,
+          gender: user.student.gender,
+          dob: user.student.dob,
+          nric: user.student.nric,
+          passport: user.student.passport,
+          contact: user.student.contact,
+          moeEmail: user.student.moeEmail,
+          race: user.student.race,
+          school: user.student.school,
+          nationality: user.student.nationality,
+          parentName: user.student.parentName,
+          relationship: user.student.relationship,
+          parentEmail: user.student.parentEmail,
+          parentContact: user.student.parentContact,
+          rejectedBy: user.student.rejectedBy
+        }
+      : {};
 
     return {
       id: user.id,
-      status: user.status,
-      centerId: get(user.center, 'id', null),
-      centerName: get(user.center, 'name', null),
+      email: user.email,
       role: user.role,
-      fullName: user.fullName,
-      gender: user.gender,
-      dob: user.dob,
-      nric: user.nric,
-      passport: user.passport,
-      contact: user.contact,
-      moeEmail: user.moeEmail,
-      race: user.race,
-      school: user.school,
-      nationality: user.nationality,
-      parentName: user.parentName,
-      relationship: user.relationship,
-      parentEmail: user.parentEmail,
-      parentContact: user.parentContact,
-      paymentMethod: user.paymentMethod
+      status: user.status,
+      ...centerDetails,
+      ...studentDetails
     };
   }
 
   public async users(
-    payload: { status?: USER_STATUS; role?: ROLE },
-    userInfo: {
-      id: string;
-      role: ROLE;
-      centerId: string;
-    }
+    role: ROLE,
+    optional: { status?: USER_STATUS },
+    userInfo?: { role: ROLE; centerId: string }
   ): Promise<{
-    totalUser: number;
-    pendingCenter: any;
-    pendingAdmin: any;
-    approved: any;
-    rejected: any;
     data: UserResponse[];
+    totalUser: number;
+    'pending center'?: any;
+    'pending admin'?: any;
+    approved?: any;
+    rejected?: any;
   }> {
-    const where = {
-      id: Not(userInfo.id),
-      role: payload.role ? payload.role : In(Object.values(ROLE)),
-      status: payload.status ? payload.status : In(Object.values(USER_STATUS))
-    };
-    if (userInfo.role === ROLE.CENTER) set(where, 'center', userInfo.centerId);
+    const query = pick(optional, ['status']);
+    if (get(userInfo, 'role', null) === ROLE.CENTER) {
+      set(query, 'center', get(userInfo, 'centerId', null));
+    }
+
     const users = await this.userRepository.find({
-      where,
+      where: { role, ...query },
       relations: ['center']
     });
 
     const mappedUsers = map(users, (user) => ({
       id: user.id,
+      role: user.role,
+      email: user.email,
       status: user.status,
       centerId: get(user.center, 'id', null),
-      centerName: get(user.center, 'name', null),
-      role: user.role,
-      fullName: user.fullName,
-      gender: user.gender,
-      dob: user.dob,
-      nric: maskingValue(user.nric),
-      passport: user.passport,
-      contact: user.contact,
-      moeEmail: user.moeEmail,
-      race: user.race,
-      school: user.school,
-      nationality: user.nationality,
-      parentName: user.parentName,
-      relationship: user.relationship,
-      parentEmail: user.parentEmail,
-      parentContact: user.parentContact,
-      paymentMethod: user.paymentMethod
+      centerName: get(user.center, 'name', null)
     }));
 
     const groupedUsers = groupBy(mappedUsers, 'status');
+    const groupedUserStatus = {};
+    Object.keys(groupedUsers).forEach((key) => {
+      set(groupedUserStatus, key, groupedUsers[key].length);
+    });
 
     return {
       totalUser: mappedUsers.length,
-      pendingCenter: get(
-        groupedUsers,
-        `${USER_STATUS.PENDING_CENTER}.length`,
-        0
-      ),
-      pendingAdmin: get(groupedUsers, `${USER_STATUS.PENDING_ADMIN}.length`, 0),
-      approved: get(groupedUsers, `${USER_STATUS.APPROVED}.length`, 0),
-      rejected: get(groupedUsers, `${USER_STATUS.REJECT}.length`, 0),
+      ...groupedUserStatus,
       data: mappedUsers
     };
   }
@@ -156,30 +163,17 @@ class UserService {
   public async create(
     email: string,
     password: string,
-    payload: {
-      role: ROLE;
-      status?: USER_STATUS;
-      nric?: string;
-      passport?: string;
-      fullName?: string;
-      gender?: string;
-      dob?: string;
-      contact?: string;
-      race?: string;
-      moeEmail?: string;
-      school?: string;
-      nationality?: string;
-      parentName?: string;
-      relationship?: RELATIONSHIP;
-      parentEmail?: string;
-      parentContact?: string;
-      center?: string;
-    }
+    role: ROLE,
+    payload?: StudentInfo
   ): Promise<UserResponse> {
-    const center = await CenterService.center(payload.center);
-    const centerStatus = get(center, 'status', null);
+    const centerId = get(payload, 'center', null);
+    const center = await CenterService.center(centerId);
 
-    if (payload.role === ROLE.STUDENT) {
+    if ((role === ROLE.CENTER || role === ROLE.STUDENT) && !center) {
+      throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
+    }
+
+    if (role === ROLE.STUDENT) {
       if (payload.nationality === 'malaysia' && isEmpty(payload.nric)) {
         throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
       } else if (
@@ -187,95 +181,79 @@ class UserService {
         isEmpty(payload.passport)
       ) {
         throwErrorsHttp('Passport is required', httpStatusCode.BAD_REQUEST);
-      } else if (centerStatus !== CENTER_STATUS.ASSIGNED) {
-        throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
       }
     }
 
-    if (
-      payload.role === ROLE.CENTER &&
-      centerStatus !== CENTER_STATUS.NOT_ASSIGN
-    ) {
-      throwErrorsHttp(
-        'Center has been assgned, please choose other center',
-        httpStatusCode.BAD_REQUEST
+    try {
+      const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
+      const rsaDecryption = new nodeRsa(privateKey);
+      const decryptedPassword = rsaDecryption.decrypt(password, 'utf8');
+      const cognitoUser = await AwsCognitoService.signUp(
+        email,
+        decryptedPassword
       );
+
+      const user = new User();
+      user.id = cognitoUser.id;
+      user.email = cognitoUser.email;
+      user.role = role;
+      user.status = USER_STATUS.PENDING_VERIFICATION;
+      user.center = centerId;
+
+      const result = await this.userRepository.save(user);
+
+      if (role === ROLE.STUDENT) {
+        const student = new Student();
+        student.user = result.id;
+        student.nric = payload.nric;
+        student.passport = payload.passport;
+        student.contact = payload.contact;
+        student.race = payload.race;
+        student.fullName = payload.fullName;
+        student.gender = payload.gender;
+        student.dob = payload.dob;
+        student.moeEmail = payload.moeEmail;
+        student.school = payload.school;
+        student.nationality = payload.nationality;
+        student.parentName = payload.parentName;
+        student.relationship = payload.relationship;
+        student.parentEmail = payload.parentEmail;
+        student.parentContact = payload.parentContact;
+        await this.studentRepository.save(student);
+      }
+
+      return this.user(result.id);
+    } catch (error) {
+      CenterService.delete(centerId);
+      throw new Error(error.message);
     }
+  }
 
-    const decryptedPassword = decryption(password);
-    const cognitoUser = await AwsCognitoService.signUp(
-      email,
-      decryptedPassword
-    );
-
-    const user = new User();
-    user.id = cognitoUser.id;
-    user.role = payload.role;
-    user.status = get(payload, 'status', USER_STATUS.PENDING_CENTER);
-    user.nric = payload.nric;
-    user.passport = payload.passport;
-    user.contact = payload.contact;
-    user.race = payload.race;
-    user.fullName = payload.fullName ? payload.fullName.toLowerCase() : null;
-    user.gender = payload.gender;
-    user.dob = payload.dob;
-    user.moeEmail = payload.moeEmail;
-    user.school = payload.school;
-    user.nationality = payload.nationality;
-    user.parentName = payload.parentName;
-    user.relationship = payload.relationship;
-    user.parentEmail = payload.parentEmail;
-    user.parentContact = payload.parentContact;
-    user.center = payload.center;
-
-    const result = await this.userRepository.save(user);
-
-    if (payload.role === ROLE.CENTER) {
-      await this.centerRepository.update(
-        { id: result.center },
-        { status: CENTER_STATUS.ASSIGNED }
-      );
-    }
-
-    return this.user(cognitoUser.id);
+  public async update(id: string, status: USER_STATUS): Promise<Boolean> {
+    await this.userRepository.update({ id }, { status });
+    return true;
   }
 
   public async approve(
     id: string,
-    role: ROLE,
-    payload: {
-      nric?: string;
-      passport?: string;
-      fullName?: string;
-      gender?: string;
-      dob?: string;
-      contact?: string;
-      race?: string;
-      moeEmail?: string;
-      school?: string;
-      nationality?: string;
-      parentName?: string;
-      relationship?: RELATIONSHIP;
-      parentEmail?: string;
-      parentContact?: string;
-      paymentMethod?: PAYMENT_METHOD;
-    }
+    payload: StudentInfo,
+    userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
-    const user = await this.user(id, {
+    const where = {
       status:
-        role === ROLE.CENTER
+        userInfo.role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
-          : USER_STATUS.PENDING_ADMIN,
-      maskNric: false
-    });
+          : USER_STATUS.PENDING_ADMIN
+    };
+    if (userInfo.centerId) set(where, 'centerId', userInfo.centerId);
+    const user = await this.user(id, where);
 
     const filterPayload = pick(payload, [
       'nric',
+      'passport',
       'fullName',
       'gender',
       'dob',
-      'nric',
-      'passport',
       'contact',
       'race',
       'moeEmail',
@@ -315,38 +293,34 @@ class UserService {
       }
     }
 
-    if (role === ROLE.CENTER && !payload.paymentMethod)
-      throwErrorsHttp('Payment method is required', httpStatusCode.BAD_REQUEST);
-
-    if (payload.paymentMethod)
-      set(filterPayload, 'paymentMethod', payload.paymentMethod);
-
-    await this.userRepository.update(
-      { id },
-      {
-        ...filterPayload,
-        status:
-          user.status === USER_STATUS.PENDING_CENTER
-            ? USER_STATUS.PENDING_ADMIN
-            : USER_STATUS.APPROVED
-      }
-    );
-    return this.user(id);
+    const updatedStatus =
+      user.status === USER_STATUS.PENDING_CENTER
+        ? USER_STATUS.PENDING_ADMIN
+        : USER_STATUS.APPROVED;
+    await this.update(id, updatedStatus);
+    await this.studentRepository.update({ user: id }, filterPayload);
+    return {
+      ...user,
+      status: updatedStatus,
+      ...filterPayload
+    };
   }
 
   public async reject(id: string, role: ROLE): Promise<UserResponse> {
-    await this.user(id, {
+    const user = await this.user(id, {
       status:
         role === ROLE.CENTER
           ? USER_STATUS.PENDING_CENTER
           : USER_STATUS.PENDING_ADMIN
     });
 
-    await this.userRepository.update(
-      { id },
-      { status: USER_STATUS.REJECT, rejectedBy: role }
-    );
-    return this.user(id);
+    await this.userRepository.update({ id }, { status: USER_STATUS.REJECT });
+    await this.studentRepository.update({ user: id }, { rejectedBy: role });
+    return {
+      ...user,
+      status: USER_STATUS.REJECT,
+      rejectedBy: role
+    };
   }
 }
 

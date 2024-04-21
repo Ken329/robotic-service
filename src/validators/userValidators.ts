@@ -1,22 +1,21 @@
 import { z } from 'zod';
 import {
-  ROLE,
   GENDER,
   DOB_REGEX,
   USER_STATUS,
   NRIC_REGEX,
   RELATIONSHIP,
-  CONTACT_REGEX,
-  PAYMENT_METHOD
+  CONTACT_REGEX
 } from '../utils/constant';
 
 const emptyStringToNull = z.literal('').transform(() => null);
 
-const users = z.object({
+const getUsers = z.object({
   query: z.object({
     status: z
       .enum(
         [
+          USER_STATUS.PENDING_VERIFICATION,
           USER_STATUS.PENDING_CENTER,
           USER_STATUS.PENDING_ADMIN,
           USER_STATUS.APPROVED,
@@ -27,17 +26,11 @@ const users = z.object({
         }
       )
       .optional()
-      .or(emptyStringToNull),
-    role: z
-      .enum([ROLE.STUDENT, ROLE.CENTER, ROLE.ADMIN], {
-        required_error: 'ROle is valid'
-      })
-      .optional()
       .or(emptyStringToNull)
   })
 });
 
-const signUp = z.object({
+const studentCreation = z.object({
   body: z.object({
     email: z
       .string({
@@ -129,21 +122,6 @@ const signUp = z.object({
   })
 });
 
-const confirmSignUp = z.object({
-  body: z.object({
-    email: z
-      .string({
-        required_error: 'Email is required'
-      })
-      .email('Email is not valid'),
-    code: z
-      .string({
-        required_error: 'Code is required'
-      })
-      .min(1, { message: 'Code should not be empty' })
-  })
-});
-
 const adminCreation = z.object({
   body: z.object({
     email: z
@@ -171,29 +149,17 @@ const centerCreation = z.object({
         required_error: 'Password is required'
       })
       .min(1, { message: 'Password should not be empty' }),
-    center: z
-      .string({
-        required_error: 'Center is required'
-      })
-      .uuid('Center is not a valid UUID')
+    name: z.string({
+      required_error: 'Name is required'
+    }),
+    location: z.string({
+      required_error: 'Location is required'
+    })
   })
 });
 
 const approval = z.object({
   body: z.object({
-    paymentMethod: z
-      .enum(
-        [
-          PAYMENT_METHOD.CASH,
-          PAYMENT_METHOD.CREDIT_CARD,
-          PAYMENT_METHOD.BANK_TRANSFER
-        ],
-        {
-          required_error: 'Payment method is required'
-        }
-      )
-      .optional()
-      .or(emptyStringToNull),
     nric: z
       .string({
         required_error: 'NRIC is required'
@@ -286,9 +252,8 @@ const approval = z.object({
 });
 
 export default {
-  users,
-  signUp,
-  confirmSignUp,
+  getUsers,
+  studentCreation,
   adminCreation,
   centerCreation,
   approval

@@ -137,6 +137,25 @@ class AuthService {
     );
     return true;
   }
+
+  public async logout(accessToken: string): Promise<Boolean> {
+    const destructureToken = accessToken.split('Bearer ');
+    try {
+      const decodedPayload = jwt.verify(
+        get(destructureToken, 1, null),
+        process.env.JWT_SECRET_KEY,
+        { audience: this.audience }
+      );
+
+      await this.userSessionRepository.delete({
+        id: get(decodedPayload, 'jti', null)
+      });
+
+      return true;
+    } catch (error) {
+      throwErrorsHttp(error.message, httpStatusCode.UNAUTHORIZED);
+    }
+  }
 }
 
 export default new AuthService();

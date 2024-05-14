@@ -24,4 +24,6 @@ route.post(
   AuthController.refreshToken
 );
 
+route.post('/api/auth/logout', AuthController.logout);
+
 export default route;

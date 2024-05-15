@@ -34,4 +34,15 @@ const refreshToken = (req: Request, res: Response) =>
     .then((data) => successApiResponse(res, 'Successfully refresh token', data))
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { generatePublicKey, generateToken, verifyOtp, refreshToken };
+const logout = (req: Request, res: Response) =>
+  AuthService.logout(req.get('Authorization'))
+    .then((data) => successApiResponse(res, 'Successfully logout', data))
+    .catch((error) => errorApiResponse(res, error.message));
+
+export default {
+  generatePublicKey,
+  generateToken,
+  verifyOtp,
+  refreshToken,
+  logout
+};

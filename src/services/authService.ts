@@ -25,6 +25,21 @@ class AuthService {
     });
   }
 
+  private async getUserSession(id: string): Promise<UserSession> {
+    return !id
+      ? null
+      : this.userSessionRepository.findOne({
+          where: { id }
+        });
+  }
+
+  private async deleteUserSession(payload: {
+    id?: string;
+    user?: string;
+  }): Promise<object> {
+    return this.userSessionRepository.delete(pick(payload, ['id', 'user']));
+  }
+
   private async generateAuthToken(
     userId: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
@@ -48,6 +63,7 @@ class AuthService {
       { jwtid, audience: this.audience }
     );
 
+    await this.deleteUserSession({ user: userId });
     const userSession = new UserSession();
     userSession.id = jwtid;
     userSession.user = userId;
@@ -66,6 +82,29 @@ class AuthService {
     };
   }
 
+  private async verifyJwtToken(token: string): Promise<UserSession> {
+    const destructureToken = token.split('Bearer ');
+
+    const decodedPayload = jwt.verify(
+      get(destructureToken, 1, null),
+      process.env.JWT_SECRET_KEY,
+      { audience: this.audience }
+    );
+
+    const userSession = await this.getUserSession(
+      get(decodedPayload, 'jti', null)
+    );
+
+    if (!userSession) {
+      throwErrorsHttp(
+        'Access token is longer valid',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    return userSession;
+  }
+
   public async generateToken(accessToken: string): Promise<object> {
     try {
       const payload = await this.verifier.verify(accessToken);
@@ -79,24 +118,9 @@ class AuthService {
     accessToken: string,
     option?: { status: USER_STATUS }
   ): Promise<UserResponse> {
-    const destructureToken = accessToken.split('Bearer ');
     try {
-      const decodedPayload = jwt.verify(
-        get(destructureToken, 1, null),
-        process.env.JWT_SECRET_KEY,
-        { audience: this.audience }
-      );
-      const userSession = await this.userSessionRepository.findOne({
-        where: { id: get(decodedPayload, 'jti', null) }
-      });
-      if (!userSession) {
-        throwErrorsHttp(
-          'Access token is longer valid',
-          httpStatusCode.BAD_REQUEST
-        );
-      }
-
-      return UserService.user(get(decodedPayload, 'sub', null), option);
+      const data = await this.verifyJwtToken(accessToken);
+      return UserService.user(data.user, option);
     } catch (error) {
       throwErrorsHttp(error.message, httpStatusCode.UNAUTHORIZED);
     }
@@ -109,16 +133,14 @@ class AuthService {
       if (moment().isAfter(parsedPayload.exp)) {
         throwErrorsHttp('Refresh token is expired', httpStatusCode.BAD_REQUEST);
       }
-      const userSession = await this.userSessionRepository.findOne({
-        where: { id: parsedPayload.id }
-      });
+      const userSession = await this.getUserSession(parsedPayload.id);
       if (!userSession) {
         throwErrorsHttp(
           'Refresh token is longer valid',
           httpStatusCode.BAD_REQUEST
         );
       }
-      this.userSessionRepository.delete({ id: parsedPayload.id });
+
       return this.generateAuthToken(parsedPayload.userId);
     } catch (error) {
       throwErrorsHttp(error.message, httpStatusCode.UNAUTHORIZED);
@@ -136,6 +158,16 @@ class AuthService {
         : USER_STATUS.APPROVED
     );
     return true;
+  }
+
+  public async logout(accessToken: string): Promise<Boolean> {
+    try {
+      const data = await this.verifyJwtToken(accessToken);
+      await this.deleteUserSession({ id: data.id });
+      return true;
+    } catch (error) {
+      throwErrorsHttp(error.message, httpStatusCode.UNAUTHORIZED);
+    }
   }
 }
 

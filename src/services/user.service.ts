@@ -2,11 +2,16 @@ import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
-import CenterService from './centerService';
-import AwsCognitoService from './awsCognitoService';
+import CenterService from './center.service';
+import AwsCognitoService from './awsCognito.service';
+import {
+  ROLE,
+  TSHIRT_SIZE,
+  USER_STATUS,
+  RELATIONSHIP
+} from '../utils/constant';
 import DataSource from '../database/dataSource';
-import { throwErrorsHttp } from '../utils/helpers';
-import { ROLE, USER_STATUS, RELATIONSHIP } from '../utils/constant';
+import { binaryToBool, throwErrorsHttp } from '../utils/helpers';
 import { User } from '../database/entity/User';
 import { Student } from '../database/entity/Student';
 
@@ -38,6 +43,7 @@ export type UserResponse = {
 type StudentInfo = {
   center?: string;
   nric?: string;
+  size?: TSHIRT_SIZE;
   passport?: string;
   fullName?: string;
   gender?: string;
@@ -51,6 +57,7 @@ type StudentInfo = {
   relationship?: RELATIONSHIP;
   parentEmail?: string;
   parentContact?: string;
+  parentConsent?: boolean;
 };
 
 class UserService {
@@ -89,6 +96,7 @@ class UserService {
     const studentDetails = user.student
       ? {
           fullName: user.student.fullName,
+          size: user.student.size,
           gender: user.student.gender,
           dob: user.student.dob,
           nric: user.student.nric,
@@ -102,6 +110,7 @@ class UserService {
           relationship: user.student.relationship,
           parentEmail: user.student.parentEmail,
           parentContact: user.student.parentContact,
+          parentConsent: binaryToBool(user.student.parentConsent),
           rejectedBy: user.student.rejectedBy
         }
       : {};
@@ -135,7 +144,7 @@ class UserService {
 
     const users = await this.userRepository.find({
       where: { role, ...query },
-      relations: ['center']
+      relations: ['center', 'student']
     });
 
     const mappedUsers = map(users, (user) => ({
@@ -143,6 +152,7 @@ class UserService {
       role: user.role,
       email: user.email,
       status: user.status,
+      name: get(user.student, 'fullName', null),
       centerId: get(user.center, 'id', null),
       centerName: get(user.center, 'name', null)
     }));
@@ -206,6 +216,7 @@ class UserService {
         const student = new Student();
         student.user = result.id;
         student.nric = payload.nric;
+        student.size = payload.size;
         student.passport = payload.passport;
         student.contact = payload.contact;
         student.race = payload.race;
@@ -219,6 +230,7 @@ class UserService {
         student.relationship = payload.relationship;
         student.parentEmail = payload.parentEmail;
         student.parentContact = payload.parentContact;
+        student.parentConsent = payload.parentConsent;
         await this.studentRepository.save(student);
       }
 
@@ -250,6 +262,7 @@ class UserService {
 
     const filterPayload = pick(payload, [
       'nric',
+      'size',
       'passport',
       'fullName',
       'gender',
@@ -262,7 +275,8 @@ class UserService {
       'parentName',
       'relationship',
       'parentEmail',
-      'parentContact'
+      'parentContact',
+      'parentConsent'
     ]);
 
     if (

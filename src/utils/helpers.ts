@@ -46,6 +46,8 @@ export const maskingValue = (value: string) => {
   return value.replace(/\d(?=(?:\D*\d){4})/g, '*');
 };
 
+export const binaryToBool = (value: boolean) => !!value;
+
 export const successApiResponse = (
   res: Response,
   message: string,

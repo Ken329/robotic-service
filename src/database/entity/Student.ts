@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { User } from './User';
-import { ROLE, GENDER, RELATIONSHIP } from '../../utils/constant';
+import { ROLE, GENDER, RELATIONSHIP, TSHIRT_SIZE } from '../../utils/constant';
 
 @Entity()
 export class Student {
@@ -21,6 +21,9 @@ export class Student {
   user: string;
 
   @Column({ nullable: true })
+  level: string;
+
+  @Column({ nullable: true })
   nric: string;
 
   @Column({ nullable: true })
@@ -28,6 +31,9 @@ export class Student {
 
   @Column({ nullable: true })
   contact: string;
+
+  @Column({ type: 'varchar', enum: TSHIRT_SIZE, nullable: false })
+  size: string;
 
   @Column({ nullable: true })
   moeEmail: string;
@@ -61,6 +67,9 @@ export class Student {
 
   @Column({ nullable: false })
   parentContact: string;
+
+  @Column({ type: 'tinyint', nullable: false, default: false })
+  parentConsent: boolean;
 
   @Column({ type: 'varchar', enum: ROLE, nullable: true })
   rejectedBy: string;

@@ -8,7 +8,7 @@ const route: Application = Express();
 route.post(
   '/api-internal/user/admin',
   authenticate(AUTH_STRATEGY.APIKEY),
-  validate(Validators.UserValidators.adminCreation),
+  validate(Validators.userValidators.adminCreation),
   UserController.createAdmin
 );
 

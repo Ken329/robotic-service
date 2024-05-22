@@ -2,6 +2,7 @@ import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import LevelService from './level.service';
 import CenterService from './center.service';
 import AwsCognitoService from './awsCognito.service';
 import {
@@ -20,6 +21,7 @@ export type UserResponse = {
   email: string;
   role: string;
   status: string;
+  level?: string;
   centerId?: string;
   centerName?: string;
   centerLocation?: string;
@@ -41,6 +43,7 @@ export type UserResponse = {
 };
 
 type StudentInfo = {
+  level?: string;
   center?: string;
   nric?: string;
   size?: TSHIRT_SIZE;
@@ -246,11 +249,37 @@ class UserService {
     return true;
   }
 
+  public async delete(id: string, role: ROLE): Promise<Boolean> {
+    if (role === ROLE.ADMIN) {
+      throwErrorsHttp(
+        'Admin is not allow to be deleted',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    if (role === ROLE.CENTER) {
+      const userInfo = await this.user(id);
+      // NOTE: cascade with user table, user details will be deleted once center data removed
+      await CenterService.delete(userInfo.centerId);
+      return true;
+    }
+
+    await this.userRepository.delete({ id, role });
+    return true;
+  }
+
   public async approve(
     id: string,
     payload: StudentInfo,
     userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
+    if (userInfo.role === ROLE.CENTER && !get(payload, 'level', null)) {
+      throwErrorsHttp(
+        'Level is required upon approval',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
     const where = {
       status:
         userInfo.role === ROLE.CENTER
@@ -261,6 +290,7 @@ class UserService {
     const user = await this.user(id, where);
 
     const filterPayload = pick(payload, [
+      'level',
       'nric',
       'size',
       'passport',
@@ -278,6 +308,13 @@ class UserService {
       'parentContact',
       'parentConsent'
     ]);
+
+    if (filterPayload.level) {
+      const levelDetails = await LevelService.level(filterPayload.level);
+      if (!levelDetails) {
+        throwErrorsHttp('Invalid level', httpStatusCode.BAD_REQUEST);
+      }
+    }
 
     if (
       filterPayload.nationality ||

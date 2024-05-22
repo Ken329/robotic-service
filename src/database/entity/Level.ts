@@ -6,18 +6,15 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { User } from './User';
+import { Student } from './Student';
 
 @Entity()
-export class Center {
+export class Level {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: false })
-  name: string;
-
   @Column({ nullable: false, unique: true })
-  location: string;
+  name: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -25,6 +22,6 @@ export class Center {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => User, (user) => user.center)
-  user: User;
+  @OneToOne(() => Student, (student) => student.level)
+  student: Student;
 }

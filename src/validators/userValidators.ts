@@ -194,6 +194,11 @@ const approval = z.object({
       .string({ required_error: 'Parent contact is required' })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +6012-3456789')
       .optional()
+      .or(emptyStringToNull),
+    level: z
+      .string({ required_error: 'Level is required' })
+      .uuid('Level is not valid')
+      .optional()
       .or(emptyStringToNull)
   })
 });

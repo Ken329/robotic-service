@@ -47,6 +47,13 @@ const createStudent = async (req: Request, res: Response) =>
       return errorApiResponse(res, error.message);
     });
 
+const deleteStudent = async (req: Request, res: Response) =>
+  UserService.delete(req.params.id, ROLE.STUDENT)
+    .then(() => successApiResponse(res, 'Successfully delete student account'))
+    .catch((error) => {
+      return errorApiResponse(res, error.message);
+    });
+
 const createCenter = async (req: Request, res: Response) => {
   try {
     const center = await CenterService.create(req.body);
@@ -54,9 +61,7 @@ const createCenter = async (req: Request, res: Response) => {
       req.body.email,
       req.body.password,
       ROLE.CENTER,
-      {
-        center: center.id
-      }
+      { center: center.id }
     );
     return successApiResponse(res, 'Successfully create center', {
       id: data.id,
@@ -71,6 +76,13 @@ const createCenter = async (req: Request, res: Response) => {
     return errorApiResponse(res, error.message);
   }
 };
+
+const deleteCenter = async (req: Request, res: Response) =>
+  UserService.delete(req.params.id, ROLE.CENTER)
+    .then(() => successApiResponse(res, 'Successfully delete center account'))
+    .catch((error) => {
+      return errorApiResponse(res, error.message);
+    });
 
 const createAdmin = async (req: Request, res: Response) =>
   UserService.create(req.body.email, req.body.password, ROLE.ADMIN)
@@ -111,8 +123,10 @@ export default {
   getUser,
   getStudents,
   createStudent,
+  deleteStudent,
   getCenters,
   createCenter,
+  deleteCenter,
   createAdmin,
   signUpApproval,
   signUpReject

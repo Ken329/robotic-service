@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { User } from './User';
+import { Level } from './Level';
 import { ROLE, GENDER, RELATIONSHIP, TSHIRT_SIZE } from '../../utils/constant';
 
 @Entity()
@@ -15,12 +16,14 @@ export class Student {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user' })
   @Column({ type: 'uuid' })
   user: string;
 
-  @Column({ nullable: true })
+  @OneToOne(() => Level, (level) => level.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'level' })
+  @Column({ type: 'uuid', nullable: true })
   level: string;
 
   @Column({ nullable: true })

@@ -1,6 +1,9 @@
-import { map, pick } from 'lodash';
+import { get, map, pick } from 'lodash';
+import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
-import { USER_STATUS } from '../utils/constant';
+import { throwErrorsHttp } from '../utils/helpers';
+import { ROLE, USER_STATUS } from '../utils/constant';
+import { User } from '../database/entity/User';
 import { Center } from '../database/entity/Center';
 
 type CenterResponse = {
@@ -11,8 +14,10 @@ type CenterResponse = {
 
 class UserService {
   private centerRepository;
+  private userRepository;
 
   constructor() {
+    this.userRepository = DataSource.getRepository(User);
     this.centerRepository = DataSource.getRepository(Center);
   }
 
@@ -42,6 +47,16 @@ class UserService {
   }
 
   public async delete(id: string): Promise<boolean> {
+    const users = await this.userRepository.findAndCount({
+      where: { center: id, role: ROLE.STUDENT }
+    });
+    const userAmount = get(users, 1);
+    if (userAmount > 0) {
+      throwErrorsHttp(
+        `Center is not allow to be deleted as there are ${userAmount} student assigned to this center`,
+        httpStatusCode.BAD_REQUEST
+      );
+    }
     await this.centerRepository.delete({ id });
     return true;
   }

@@ -4,7 +4,7 @@ import {
   errorApiResponse,
   successApiResponse
 } from '../utils/helpers';
-import AuthService from '../services/authService';
+import AuthService from '../services/Auth.service';
 
 const generatePublicKey = (req: Request, res: Response) => {
   try {

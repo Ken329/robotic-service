@@ -2,11 +2,17 @@ import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
-import CenterService from './centerService';
-import AwsCognitoService from './awsCognitoService';
+import LevelService from './Level.service';
+import CenterService from './Center.service';
+import AwsCognitoService from './AwsCognito.service';
+import {
+  ROLE,
+  TSHIRT_SIZE,
+  USER_STATUS,
+  RELATIONSHIP
+} from '../utils/constant';
 import DataSource from '../database/dataSource';
-import { throwErrorsHttp } from '../utils/helpers';
-import { ROLE, USER_STATUS, RELATIONSHIP } from '../utils/constant';
+import { binaryToBool, throwErrorsHttp } from '../utils/helpers';
 import { User } from '../database/entity/User';
 import { Student } from '../database/entity/Student';
 
@@ -15,6 +21,7 @@ export type UserResponse = {
   email: string;
   role: string;
   status: string;
+  level?: string;
   centerId?: string;
   centerName?: string;
   centerLocation?: string;
@@ -36,8 +43,10 @@ export type UserResponse = {
 };
 
 type StudentInfo = {
+  level?: string;
   center?: string;
   nric?: string;
+  size?: TSHIRT_SIZE;
   passport?: string;
   fullName?: string;
   gender?: string;
@@ -51,6 +60,7 @@ type StudentInfo = {
   relationship?: RELATIONSHIP;
   parentEmail?: string;
   parentContact?: string;
+  parentConsent?: boolean;
 };
 
 class UserService {
@@ -89,6 +99,7 @@ class UserService {
     const studentDetails = user.student
       ? {
           fullName: user.student.fullName,
+          size: user.student.size,
           gender: user.student.gender,
           dob: user.student.dob,
           nric: user.student.nric,
@@ -102,6 +113,7 @@ class UserService {
           relationship: user.student.relationship,
           parentEmail: user.student.parentEmail,
           parentContact: user.student.parentContact,
+          parentConsent: binaryToBool(user.student.parentConsent),
           rejectedBy: user.student.rejectedBy
         }
       : {};
@@ -135,7 +147,7 @@ class UserService {
 
     const users = await this.userRepository.find({
       where: { role, ...query },
-      relations: ['center']
+      relations: ['center', 'student']
     });
 
     const mappedUsers = map(users, (user) => ({
@@ -143,6 +155,7 @@ class UserService {
       role: user.role,
       email: user.email,
       status: user.status,
+      name: get(user.student, 'fullName', null),
       centerId: get(user.center, 'id', null),
       centerName: get(user.center, 'name', null)
     }));
@@ -206,6 +219,7 @@ class UserService {
         const student = new Student();
         student.user = result.id;
         student.nric = payload.nric;
+        student.size = payload.size;
         student.passport = payload.passport;
         student.contact = payload.contact;
         student.race = payload.race;
@@ -219,6 +233,7 @@ class UserService {
         student.relationship = payload.relationship;
         student.parentEmail = payload.parentEmail;
         student.parentContact = payload.parentContact;
+        student.parentConsent = payload.parentConsent;
         await this.studentRepository.save(student);
       }
 
@@ -234,11 +249,37 @@ class UserService {
     return true;
   }
 
+  public async delete(id: string, role: ROLE): Promise<Boolean> {
+    if (role === ROLE.ADMIN) {
+      throwErrorsHttp(
+        'Admin is not allow to be deleted',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    if (role === ROLE.CENTER) {
+      const userInfo = await this.user(id);
+      // NOTE: cascade with user table, user details will be deleted once center data removed
+      await CenterService.delete(userInfo.centerId);
+      return true;
+    }
+
+    await this.userRepository.delete({ id, role });
+    return true;
+  }
+
   public async approve(
     id: string,
     payload: StudentInfo,
     userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
+    if (userInfo.role === ROLE.CENTER && !get(payload, 'level', null)) {
+      throwErrorsHttp(
+        'Level is required upon approval',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
     const where = {
       status:
         userInfo.role === ROLE.CENTER
@@ -249,7 +290,9 @@ class UserService {
     const user = await this.user(id, where);
 
     const filterPayload = pick(payload, [
+      'level',
       'nric',
+      'size',
       'passport',
       'fullName',
       'gender',
@@ -262,8 +305,16 @@ class UserService {
       'parentName',
       'relationship',
       'parentEmail',
-      'parentContact'
+      'parentContact',
+      'parentConsent'
     ]);
+
+    if (filterPayload.level) {
+      const levelDetails = await LevelService.level(filterPayload.level);
+      if (!levelDetails) {
+        throwErrorsHttp('Invalid level', httpStatusCode.BAD_REQUEST);
+      }
+    }
 
     if (
       filterPayload.nationality ||

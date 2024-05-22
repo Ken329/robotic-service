@@ -14,7 +14,7 @@ export class UserSession {
   @Column({ type: 'uuid', primary: true })
   id: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user' })
   @Column({ type: 'uuid' })
   user: string;

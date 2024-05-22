@@ -26,6 +26,17 @@ export enum GENDER {
   OTHERS = 'others'
 }
 
+export enum TSHIRT_SIZE {
+  '4xs' = '4XS',
+  '3xs' = '3XS',
+  '2xs' = '2XS',
+  'xs' = 'XS',
+  's' = 'S',
+  'm' = 'M',
+  'l' = 'L',
+  'xl' = 'XL'
+}
+
 export const CONTACT_REGEX = new RegExp(
   /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$/
 );

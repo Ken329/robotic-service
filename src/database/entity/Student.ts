@@ -8,17 +8,23 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { User } from './User';
-import { ROLE, GENDER, RELATIONSHIP } from '../../utils/constant';
+import { Level } from './Level';
+import { ROLE, GENDER, RELATIONSHIP, TSHIRT_SIZE } from '../../utils/constant';
 
 @Entity()
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user' })
   @Column({ type: 'uuid' })
   user: string;
+
+  @OneToOne(() => Level, (level) => level.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'level' })
+  @Column({ type: 'uuid', nullable: true })
+  level: string;
 
   @Column({ nullable: true })
   nric: string;
@@ -28,6 +34,9 @@ export class Student {
 
   @Column({ nullable: true })
   contact: string;
+
+  @Column({ type: 'varchar', enum: TSHIRT_SIZE, nullable: false })
+  size: string;
 
   @Column({ nullable: true })
   moeEmail: string;
@@ -61,6 +70,9 @@ export class Student {
 
   @Column({ nullable: false })
   parentContact: string;
+
+  @Column({ type: 'tinyint', nullable: false, default: false })
+  parentConsent: boolean;
 
   @Column({ type: 'varchar', enum: ROLE, nullable: true })
   rejectedBy: string;

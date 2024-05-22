@@ -2,7 +2,7 @@ import passport from 'passport';
 import { isEmpty } from 'lodash';
 import passportCustom from 'passport-custom';
 import { Request, Response, NextFunction } from 'express';
-import AuthService from '../services/authService';
+import AuthService from '../services/Auth.service';
 import { throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS } from '../utils/constant';
 

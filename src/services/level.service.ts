@@ -1,9 +1,9 @@
 import { get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
+import { throwErrorsHttp } from '../utils/helpers';
 import { Level } from '../database/entity/Level';
 import { Student } from '../database/entity/Student';
-import { throwErrorsHttp } from '../utils/helpers';
 
 type LevelResponse = {
   id: string;

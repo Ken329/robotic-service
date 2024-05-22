@@ -2,9 +2,9 @@ import fs from 'fs';
 import nodeRsa from 'node-rsa';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
-import LevelService from './level.service';
-import CenterService from './center.service';
-import AwsCognitoService from './awsCognito.service';
+import LevelService from './Level.service';
+import CenterService from './Center.service';
+import AwsCognitoService from './AwsCognito.service';
 import {
   ROLE,
   TSHIRT_SIZE,

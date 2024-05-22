@@ -1,8 +1,8 @@
 import { get, pick } from 'lodash';
 import { Request, Response } from 'express';
 import { ROLE } from '../utils/constant';
-import UserService from '../services/user.service';
-import CenterService from '../services/center.service';
+import UserService from '../services/User.service';
+import CenterService from '../services/Center.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
 
 const user = async (req: Request, res: Response) =>

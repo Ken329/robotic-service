@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import CenterService from '../services/Center.service';
+import CenterService from '../services/center.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
 
 const centers = async (req: Request, res: Response) =>

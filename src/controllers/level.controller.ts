@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import LevelService from '../services/Level.service';
+import LevelService from '../services/level.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
 
 const levels = async (req: Request, res: Response) =>

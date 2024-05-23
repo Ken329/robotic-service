@@ -4,3 +4,4 @@ ssl
 .env
 .vscode
 dist
+.env.production.local

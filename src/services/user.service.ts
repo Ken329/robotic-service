@@ -99,6 +99,7 @@ class UserService {
     const studentDetails = user.student
       ? {
           fullName: user.student.fullName,
+          level: user.student.level,
           size: user.student.size,
           gender: user.student.gender,
           dob: user.student.dob,

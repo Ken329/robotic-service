@@ -2,6 +2,7 @@ import {
   Entity,
   Column,
   OneToOne,
+  ManyToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -21,7 +22,7 @@ export class Student {
   @Column({ type: 'uuid' })
   user: string;
 
-  @OneToOne(() => Level, (level) => level.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Level, (level) => level.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'level' })
   @Column({ type: 'uuid', nullable: true })
   level: string;

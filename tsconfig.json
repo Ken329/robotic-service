@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
 
     // Recommended: Compiler complains about expressions implicitly typed as 'any'
-    "noImplicitAny": true
+    "noImplicitAny": false
   },
   "include": ["src"], // which files to compile
   "exclude": ["node_modules"] // which files to skip

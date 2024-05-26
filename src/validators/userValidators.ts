@@ -127,7 +127,7 @@ const centerCreation = z.object({
   })
 });
 
-const approval = z.object({
+const studentUpdate = z.object({
   body: z.object({
     nric: z
       .string({ required_error: 'NRIC is required' })
@@ -142,6 +142,22 @@ const approval = z.object({
       .enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
         required_error: 'Gender is required'
       })
+      .optional()
+      .or(emptyStringToNull),
+    size: z
+      .enum(
+        [
+          TSHIRT_SIZE['4xs'],
+          TSHIRT_SIZE['3xs'],
+          TSHIRT_SIZE['2xs'],
+          TSHIRT_SIZE['xs'],
+          TSHIRT_SIZE['s'],
+          TSHIRT_SIZE['m'],
+          TSHIRT_SIZE['l'],
+          TSHIRT_SIZE['xl']
+        ],
+        { required_error: 'Size is required' }
+      )
       .optional()
       .or(emptyStringToNull),
     dob: z
@@ -208,5 +224,5 @@ export default {
   studentCreation,
   adminCreation,
   centerCreation,
-  approval
+  studentUpdate
 };

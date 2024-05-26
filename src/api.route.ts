@@ -73,6 +73,14 @@ route.post(
   userController.createStudent
 );
 
+route.put(
+  '/api/user/student/:id',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.ParamsId),
+  validate(Validators.userValidators.studentUpdate),
+  userController.updateStudent
+);
+
 route.delete(
   '/api/user/student/:id',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
@@ -98,7 +106,7 @@ route.post(
   '/api/user/:id/approve',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   validate(Validators.ParamsId),
-  validate(Validators.userValidators.approval),
+  validate(Validators.userValidators.studentUpdate),
   userController.signUpApproval
 );
 

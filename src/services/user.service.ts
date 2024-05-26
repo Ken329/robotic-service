@@ -1,5 +1,5 @@
 import fs from 'fs';
-import nodeRsa from 'node-rsa';
+import crypto from 'crypto';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
@@ -15,6 +15,8 @@ import DataSource from '../database/dataSource';
 import { binaryToBool, throwErrorsHttp } from '../utils/helpers';
 import { User } from '../database/entity/User';
 import { Student } from '../database/entity/Student';
+import moment from 'moment';
+import { In } from 'typeorm';
 
 export type UserResponse = {
   id: string;
@@ -39,6 +41,7 @@ export type UserResponse = {
   relationship?: string;
   parentEmail?: string;
   parentContact?: string;
+  expiryDate?: Date;
   rejectedBy?: string;
 };
 
@@ -61,6 +64,7 @@ type StudentInfo = {
   parentEmail?: string;
   parentContact?: string;
   parentConsent?: boolean;
+  expiryDate?: Date;
 };
 
 class UserService {
@@ -115,15 +119,18 @@ class UserService {
           parentEmail: user.student.parentEmail,
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
+          expiryDate: user.student.expiryDate,
           rejectedBy: user.student.rejectedBy
         }
       : {};
 
+    if (moment().isAfter(get(studentDetails, 'expiryDate', null))) {
+      await this.userRepository.update({ id }, { status: USER_STATUS.EXPIRED });
+      user.status = USER_STATUS.EXPIRED;
+    }
+
     return {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      status: user.status,
+      ...pick(user, ['id', 'email', 'role', 'status']),
       ...centerDetails,
       ...studentDetails
     };
@@ -151,16 +158,28 @@ class UserService {
       relations: ['center', 'student']
     });
 
-    const mappedUsers = map(users, (user) => ({
-      id: user.id,
-      role: user.role,
-      email: user.email,
-      status: user.status,
-      name: get(user.student, 'fullName', null),
-      centerId: get(user.center, 'id', null),
-      centerName: get(user.center, 'name', null)
-    }));
+    const expiredStudent = [];
+    const mappedUsers = map(users, (user) => {
+      const payload = pick(user, ['id', 'role', 'email', 'status']);
+      if (
+        role === ROLE.STUDENT &&
+        moment().isAfter(get(user.student, 'expiryDate', null))
+      ) {
+        expiredStudent.push(user.id);
+        payload.status = USER_STATUS.EXPIRED;
+      }
+      return {
+        ...payload,
+        name: get(user.student, 'fullName', null),
+        centerId: get(user.center, 'id', null),
+        centerName: get(user.center, 'name', null)
+      };
+    });
 
+    this.userRepository.update(
+      { id: In(expiredStudent) },
+      { status: USER_STATUS.EXPIRED }
+    );
     const groupedUsers = groupBy(mappedUsers, 'status');
     const groupedUserStatus = {};
     Object.keys(groupedUsers).forEach((key) => {
@@ -200,8 +219,9 @@ class UserService {
 
     try {
       const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, 'utf8');
-      const rsaDecryption = new nodeRsa(privateKey);
-      const decryptedPassword = rsaDecryption.decrypt(password, 'utf8');
+      const decryptedPassword = crypto
+        .privateDecrypt({ key: privateKey }, Buffer.from(password, 'base64'))
+        .toString();
       const cognitoUser = await AwsCognitoService.signUp(
         email,
         decryptedPassword
@@ -250,6 +270,74 @@ class UserService {
     return true;
   }
 
+  public async updateStudent(
+    id: string,
+    payload: StudentInfo,
+    options?: { where?: object }
+  ): Promise<UserResponse> {
+    const where = get(options, 'where', {});
+    const user = await this.user(id, where);
+
+    const filterPayload = pick(payload, [
+      'level',
+      'nric',
+      'size',
+      'passport',
+      'fullName',
+      'gender',
+      'dob',
+      'contact',
+      'race',
+      'moeEmail',
+      'school',
+      'nationality',
+      'parentName',
+      'relationship',
+      'parentEmail',
+      'parentContact',
+      'parentConsent',
+      'expiryDate'
+    ]);
+
+    if (filterPayload.level) {
+      const levelDetails = await LevelService.level(filterPayload.level);
+      if (!levelDetails) {
+        throwErrorsHttp('Invalid level', httpStatusCode.BAD_REQUEST);
+      }
+    }
+
+    if (
+      filterPayload.nationality ||
+      filterPayload.nric ||
+      filterPayload.passport
+    ) {
+      const updatedUserData = {
+        nationality: filterPayload.nationality
+          ? filterPayload.nationality
+          : user.nationality,
+        nric: filterPayload.nric ? filterPayload.nric : user.nric,
+        passport: filterPayload.passport
+          ? filterPayload.passport
+          : user.passport
+      };
+
+      if (
+        updatedUserData.nationality === 'malaysia' &&
+        isEmpty(updatedUserData.nric)
+      ) {
+        throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
+      } else if (
+        updatedUserData.nationality !== 'malaysia' &&
+        isEmpty(updatedUserData.passport)
+      ) {
+        throwErrorsHttp('Passport is required', httpStatusCode.BAD_REQUEST);
+      }
+    }
+
+    await this.studentRepository.update({ user: id }, filterPayload);
+    return { ...user, ...filterPayload };
+  }
+
   public async delete(id: string, role: ROLE): Promise<Boolean> {
     if (role === ROLE.ADMIN) {
       throwErrorsHttp(
@@ -288,73 +376,23 @@ class UserService {
           : USER_STATUS.PENDING_ADMIN
     };
     if (userInfo.centerId) set(where, 'centerId', userInfo.centerId);
-    const user = await this.user(id, where);
-
-    const filterPayload = pick(payload, [
-      'level',
-      'nric',
-      'size',
-      'passport',
-      'fullName',
-      'gender',
-      'dob',
-      'contact',
-      'race',
-      'moeEmail',
-      'school',
-      'nationality',
-      'parentName',
-      'relationship',
-      'parentEmail',
-      'parentContact',
-      'parentConsent'
-    ]);
-
-    if (filterPayload.level) {
-      const levelDetails = await LevelService.level(filterPayload.level);
-      if (!levelDetails) {
-        throwErrorsHttp('Invalid level', httpStatusCode.BAD_REQUEST);
-      }
-    }
-
-    if (
-      filterPayload.nationality ||
-      filterPayload.nric ||
-      filterPayload.passport
-    ) {
-      const updatedUserData = {
-        nationality: filterPayload.nationality
-          ? filterPayload.nationality
-          : user.nationality,
-        nric: filterPayload.nric ? filterPayload.nric : user.nric,
-        passport: filterPayload.passport
-          ? filterPayload.passport
-          : user.passport
-      };
-
-      if (
-        updatedUserData.nationality === 'malaysia' &&
-        isEmpty(updatedUserData.nric)
-      ) {
-        throwErrorsHttp('NRIC is required', httpStatusCode.BAD_REQUEST);
-      } else if (
-        updatedUserData.nationality !== 'malaysia' &&
-        isEmpty(updatedUserData.passport)
-      ) {
-        throwErrorsHttp('Passport is required', httpStatusCode.BAD_REQUEST);
-      }
-    }
+    const userDetails = await this.updateStudent(id, payload, { where });
 
     const updatedStatus =
-      user.status === USER_STATUS.PENDING_CENTER
+      userDetails.status === USER_STATUS.PENDING_CENTER
         ? USER_STATUS.PENDING_ADMIN
         : USER_STATUS.APPROVED;
     await this.update(id, updatedStatus);
-    await this.studentRepository.update({ user: id }, filterPayload);
+
+    if (updatedStatus === USER_STATUS.APPROVED) {
+      const expiryDate = moment().add(1, 'y').toDate();
+      await this.updateStudent(id, { expiryDate });
+      userDetails.expiryDate = expiryDate;
+    }
+
     return {
-      ...user,
-      status: updatedStatus,
-      ...filterPayload
+      ...userDetails,
+      status: updatedStatus
     };
   }
 

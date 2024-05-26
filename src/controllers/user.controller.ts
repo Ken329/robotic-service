@@ -47,6 +47,17 @@ const createStudent = async (req: Request, res: Response) =>
       return errorApiResponse(res, error.message);
     });
 
+const updateStudent = async (req: Request, res: Response) =>
+  UserService.updateStudent(req.params.id, req.body)
+    .then((data) =>
+      successApiResponse(
+        res,
+        `Successfully update student info by ${get(req, 'user.role')}`,
+        data
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 const deleteStudent = async (req: Request, res: Response) =>
   UserService.delete(req.params.id, ROLE.STUDENT)
     .then(() => successApiResponse(res, 'Successfully delete student account'))
@@ -101,7 +112,7 @@ const signUpApproval = async (req: Request, res: Response) =>
     .then((data) =>
       successApiResponse(
         res,
-        `Successfully approve sign up by ${get(req, 'user.role')}`,
+        `Successfully approve by ${get(req, 'user.role')}`,
         data
       )
     )
@@ -112,7 +123,7 @@ const signUpReject = async (req: Request, res: Response) =>
     .then((data) =>
       successApiResponse(
         res,
-        `Successfully reject sign up by ${get(req, 'user.role')}`,
+        `Successfully reject by ${get(req, 'user.role')}`,
         data
       )
     )
@@ -123,6 +134,7 @@ export default {
   getUser,
   getStudents,
   createStudent,
+  updateStudent,
   deleteStudent,
   getCenters,
   createCenter,

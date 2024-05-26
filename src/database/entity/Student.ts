@@ -75,6 +75,9 @@ export class Student {
   @Column({ type: 'tinyint', nullable: false, default: false })
   parentConsent: boolean;
 
+  @Column({ type: 'date', nullable: true })
+  expiryDate: Date;
+
   @Column({ type: 'varchar', enum: ROLE, nullable: true })
   rejectedBy: string;
 

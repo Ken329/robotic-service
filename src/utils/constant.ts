@@ -5,7 +5,8 @@ export enum USER_STATUS {
   PENDING_CENTER = 'pending center',
   PENDING_ADMIN = 'pending admin',
   APPROVED = 'approved',
-  REJECT = 'rejected'
+  REJECT = 'rejected',
+  EXPIRED = 'expired'
 }
 
 export enum ROLE {

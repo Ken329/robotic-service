@@ -22,7 +22,7 @@ export type UserResponse = {
   id: string;
   email: string;
   role: string;
-  status: string;
+  status: USER_STATUS;
   level?: string;
   centerId?: string;
   centerName?: string;
@@ -385,7 +385,7 @@ class UserService {
     await this.update(id, updatedStatus);
 
     if (updatedStatus === USER_STATUS.APPROVED) {
-      const expiryDate = moment().add(1, 'y').toDate();
+      const expiryDate = moment().endOf('year').toDate();
       await this.updateStudent(id, { expiryDate });
       userDetails.expiryDate = expiryDate;
     }
@@ -411,6 +411,20 @@ class UserService {
       status: USER_STATUS.REJECT,
       rejectedBy: role
     };
+  }
+
+  public async renew(id: string, payload: StudentInfo): Promise<UserResponse> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
+
+    set(payload, 'expiryDate', moment().endOf('year').toDate());
+    const userDetails = await this.updateStudent(id, payload);
+
+    userDetails.status = USER_STATUS.APPROVED;
+    await this.update(id, userDetails.status);
+
+    return userDetails;
   }
 }
 

@@ -117,6 +117,14 @@ route.post(
   userController.signUpReject
 );
 
+route.post(
+  '/api/user/:id/renew',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.ParamsId),
+  validate(Validators.userValidators.studentUpdate),
+  userController.renewMembership
+);
+
 /**
  * Center Routes
  */

@@ -5,6 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 import authValidators from './authValidators';
 import userValidators from './userValidators';
 import levelValidators from './levelValidators';
+import achievementValidators from './achievementValidators';
 import { errorApiResponse } from '../utils/helpers';
 
 export const validate =
@@ -19,10 +20,17 @@ export const validate =
       return next();
     } catch (error) {
       const errors = get(error, 'errors', []);
-      const message = map(
-        errors,
-        (error) => `${error.path.join('.')}: ${error.message}`
-      );
+      const message = map(errors, (error) => {
+        let errorPath = error.path.join('.');
+        if (errorPath.includes('extNameValidator')) {
+          errorPath = 'data.fileType';
+        }
+        if (errorPath.includes('mimeTypeValidator')) {
+          errorPath = 'data.fileMimeType';
+        }
+
+        return `${errorPath}: ${error.message}`;
+      });
       return errorApiResponse(res, message, httpStatusCode.BAD_REQUEST);
     }
   };
@@ -37,4 +45,10 @@ const ParamsId = z.object({
   })
 });
 
-export default { ParamsId, authValidators, userValidators, levelValidators };
+export default {
+  ParamsId,
+  authValidators,
+  userValidators,
+  levelValidators,
+  achievementValidators
+};

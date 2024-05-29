@@ -2,10 +2,12 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './entity/User';
+import { File } from './entity/File';
 import { Level } from './entity/Level';
 import { Center } from './entity/Center';
 import { Student } from './entity/Student';
 import { UserSession } from './entity/UserSession';
+import { Achievement } from './entity/Achievement';
 
 dotenv.config();
 
@@ -18,7 +20,7 @@ const dbConnection = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User, Level, Center, Student, UserSession],
+  entities: [User, File, Level, Center, Student, Achievement, UserSession],
   options: { encrypt: false }
 });
 

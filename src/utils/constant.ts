@@ -1,5 +1,14 @@
 /* eslint-disable no-unused-vars */
 
+export type FileProviderRequest = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  buffer: Buffer;
+  size: number;
+};
+
 export enum USER_STATUS {
   PENDING_VERIFICATION = 'pending verification',
   PENDING_CENTER = 'pending center',
@@ -49,3 +58,7 @@ export const NRIC_REGEX = new RegExp(
 export const DOB_REGEX = new RegExp(
   /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/
 );
+
+export const VALID_FILE_TYPE = ['.jpg', '.png', '.pdf'];
+
+export const VALID_FILE_MIME_TYPE = ['image/jpeg', 'application/pdf'];

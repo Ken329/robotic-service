@@ -17,6 +17,7 @@ import { User } from '../database/entity/User';
 import { Student } from '../database/entity/Student';
 import moment from 'moment';
 import { In } from 'typeorm';
+import levelService from './level.service';
 
 export type UserResponse = {
   id: string;
@@ -24,6 +25,7 @@ export type UserResponse = {
   role: string;
   status: USER_STATUS;
   level?: string;
+  levelName?: string;
   centerId?: string;
   centerName?: string;
   centerLocation?: string;
@@ -123,6 +125,11 @@ class UserService {
           rejectedBy: user.student.rejectedBy
         }
       : {};
+
+    if (studentDetails.level) {
+      const levelDetails = await levelService.level(studentDetails.level);
+      set(studentDetails, 'levelName', levelDetails.name);
+    }
 
     if (moment().isAfter(get(studentDetails, 'expiryDate', null))) {
       await this.userRepository.update({ id }, { status: USER_STATUS.EXPIRED });

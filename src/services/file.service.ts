@@ -3,8 +3,8 @@ import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest } from '../utils/constant';
-import { File } from '../database/entity/File';
-import { Achievement } from '../database/entity/Achievement';
+import { File } from '../database/entity/File.entity';
+import { Achievement } from '../database/entity/Achievement.entity';
 
 type FileResponse = {
   id?: string;

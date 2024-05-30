@@ -2,8 +2,8 @@ import { get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
-import { Level } from '../database/entity/Level';
-import { Student } from '../database/entity/Student';
+import { Level } from '../database/entity/Level.entity';
+import { Student } from '../database/entity/Student.entity';
 
 type LevelResponse = {
   id: string;

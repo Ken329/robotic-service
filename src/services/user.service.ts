@@ -1,5 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
+import moment from 'moment';
+import { In } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
 import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
@@ -13,11 +15,8 @@ import {
 } from '../utils/constant';
 import DataSource from '../database/dataSource';
 import { binaryToBool, throwErrorsHttp } from '../utils/helpers';
-import { User } from '../database/entity/User';
-import { Student } from '../database/entity/Student';
-import moment from 'moment';
-import { In } from 'typeorm';
-import levelService from './level.service';
+import { User } from '../database/entity/User.entity';
+import { Student } from '../database/entity/Student.entity';
 
 export type UserResponse = {
   id: string;
@@ -29,6 +28,7 @@ export type UserResponse = {
   centerId?: string;
   centerName?: string;
   centerLocation?: string;
+  studentId?: string;
   fullName?: string;
   gender?: string;
   dob?: string;
@@ -87,6 +87,7 @@ class UserService {
       set(query, 'center', query.centerId);
       delete query.centerId;
     }
+
     const user = await this.userRepository.findOne({
       where: { id, ...query },
       relations: ['center', 'student']
@@ -104,6 +105,7 @@ class UserService {
 
     const studentDetails = user.student
       ? {
+          studentId: user.student.id,
           fullName: user.student.fullName,
           level: user.student.level,
           size: user.student.size,
@@ -127,7 +129,7 @@ class UserService {
       : {};
 
     if (studentDetails.level) {
-      const levelDetails = await levelService.level(studentDetails.level);
+      const levelDetails = await LevelService.level(studentDetails.level);
       set(studentDetails, 'levelName', levelDetails.name);
     }
 

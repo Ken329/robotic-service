@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { Request, Response } from 'express';
 import AchievementService from '../services/achievement.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
@@ -16,10 +17,36 @@ const achievements = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
+const assignedAchievements = async (req: Request, res: Response) =>
+  AchievementService.assignedAchievements(
+    get(req.user, 'studentId', req.params.studentId)
+  )
+    .then((data) =>
+      successApiResponse(res, 'Successfully get assigned achievements', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 const create = async (req: Request, res: Response) =>
   AchievementService.create(req.body, req.file)
     .then((data) =>
       successApiResponse(res, 'Successfully create achievement', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
+const assign = async (req: Request, res: Response) =>
+  AchievementService.assign(req.params.studentId, req.body.achievementIds)
+    .then((data) =>
+      successApiResponse(
+        res,
+        `Successfully assign ${data} achievements for student`
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
+const update = async (req: Request, res: Response) =>
+  AchievementService.update(req.params.id, req.body)
+    .then((data) =>
+      successApiResponse(res, 'Successfully update achievement', data)
     )
     .catch((error) => errorApiResponse(res, error.message));
 
@@ -30,4 +57,12 @@ const remove = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { achievement, achievements, create, remove };
+export default {
+  achievement,
+  achievements,
+  assignedAchievements,
+  create,
+  assign,
+  update,
+  remove
+};

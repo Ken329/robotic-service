@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { File } from './File';
+import { File } from './File.entity';
 
 @Entity()
 export class Achievement {

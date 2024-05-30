@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { User } from './User';
-import { Level } from './Level';
+import { User } from './User.entity';
+import { Level } from './Level.entity';
 import { ROLE, GENDER, RELATIONSHIP, TSHIRT_SIZE } from '../../utils/constant';
 
 @Entity()

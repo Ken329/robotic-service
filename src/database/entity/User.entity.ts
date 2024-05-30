@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { Center } from './Center';
-import { Student } from './Student';
+import { Center } from './Center.entity';
+import { Student } from './Student.entity';
 import { ROLE, USER_STATUS } from '../../utils/constant';
 
 @Entity()

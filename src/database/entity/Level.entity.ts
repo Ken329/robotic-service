@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { Student } from './Student';
+import { Student } from './Student.entity';
 
 @Entity()
 export class Level {

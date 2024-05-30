@@ -1,5 +1,5 @@
 import Express, { Application } from 'express';
-import Validators, { validate } from './validators';
+import Validators, { validate, fileValidator } from './validators';
 import fileProviders from './providers/file.provider';
 import authController from './controllers/auth.controller';
 import userController from './controllers/user.controller';
@@ -66,7 +66,7 @@ route.get(
 route.get(
   '/api/user/:id',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   userController.getUser
 );
 
@@ -79,7 +79,7 @@ route.post(
 route.put(
   '/api/user/student/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   validate(Validators.userValidators.studentUpdate),
   userController.updateStudent
 );
@@ -87,7 +87,7 @@ route.put(
 route.delete(
   '/api/user/student/:id',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   userController.deleteStudent
 );
 
@@ -101,14 +101,14 @@ route.post(
 route.delete(
   '/api/user/center/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   userController.deleteCenter
 );
 
 route.post(
   '/api/user/:id/approve',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   validate(Validators.userValidators.studentUpdate),
   userController.signUpApproval
 );
@@ -116,14 +116,14 @@ route.post(
 route.post(
   '/api/user/:id/reject',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   userController.signUpReject
 );
 
 route.post(
   '/api/user/:id/renew',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   validate(Validators.userValidators.studentUpdate),
   userController.renewMembership
 );
@@ -148,7 +148,7 @@ route.post(
 route.delete(
   '/api/level/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   levelController.remove
 );
 
@@ -156,9 +156,15 @@ route.delete(
  * Achievement Routes
  */
 route.get(
+  '/api/achievement',
+  authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
+  achievementController.assignedAchievements
+);
+
+route.get(
   '/api/achievement/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   achievementController.achievement
 );
 
@@ -172,23 +178,40 @@ route.post(
   '/api/achievement',
   authenticate(AUTH_STRATEGY.ADMIN),
   fileProviders.single('file'),
+  fileValidator,
   validate(Validators.achievementValidators.create),
   achievementController.create
+);
+
+route.get(
+  '/api/achievement/assign/:studentId',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsStudentId),
+  achievementController.assignedAchievements
+);
+
+route.put(
+  '/api/achievement/assign/:studentId',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsStudentId),
+  validate(Validators.achievementValidators.assign),
+  achievementController.assign
+);
+
+route.put(
+  '/api/achievement/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.achievementValidators.update),
+  validate(Validators.paramsId),
+  achievementController.update
 );
 
 route.delete(
   '/api/achievement/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   achievementController.remove
 );
-
-// route.delete(
-//   '/api/level/:id',
-//   authenticate(AUTH_STRATEGY.ADMIN),
-//   validate(Validators.ParamsId),
-//   levelController.remove
-// );
 
 /**
  * File Routes
@@ -200,7 +223,7 @@ route.get(
     AUTH_STRATEGY.CENTER,
     AUTH_STRATEGY.APPROVED_STUDENT
   ]),
-  validate(Validators.ParamsId),
+  validate(Validators.paramsId),
   fileController.file
 );
 

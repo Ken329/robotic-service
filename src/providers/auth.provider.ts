@@ -42,6 +42,7 @@ const verifyApiKey = async (req: Request, done: any) => {
 };
 
 const verifyStudent = async (req: Request, done: any) => {
+  console.log('dasda');
   const token = req.get('Authorization');
 
   if (isEmpty(token)) return done(null, false);
@@ -59,6 +60,7 @@ const verifyStudent = async (req: Request, done: any) => {
 };
 
 const verifyApprovedStudent = async (req: Request, done: any) => {
+  console.log('dasda');
   const token = req.get('Authorization');
 
   if (isEmpty(token)) return done(null, false);
@@ -67,6 +69,7 @@ const verifyApprovedStudent = async (req: Request, done: any) => {
     const user = await AuthService.verifyToken(token, {
       status: USER_STATUS.APPROVED
     });
+    console.log(user);
 
     if (user.role !== ROLE.STUDENT) throwErrorsHttp('Role is not matched');
 
@@ -95,6 +98,7 @@ const verifyCenter = async (req: Request, done: any) => {
 };
 
 const verifyAdmin = async (req: Request, done: any) => {
+  console.log('dasdadssdsda');
   const token = req.get('Authorization');
 
   if (isEmpty(token)) return done(null, false);

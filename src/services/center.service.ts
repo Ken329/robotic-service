@@ -3,8 +3,8 @@ import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS } from '../utils/constant';
-import { User } from '../database/entity/User';
-import { Center } from '../database/entity/Center';
+import { User } from '../database/entity/User.entity';
+import { Center } from '../database/entity/Center.entity';
 
 type CenterResponse = {
   id: string;

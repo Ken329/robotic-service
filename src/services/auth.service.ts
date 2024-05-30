@@ -9,7 +9,7 @@ import AwsCognitoService from './awsCognito.service';
 import DataSource from '../database/dataSource';
 import { ROLE, USER_STATUS } from '../utils/constant';
 import { throwErrorsHttp, encryption, decryption } from '../utils/helpers';
-import { UserSession } from '../database/entity/UserSession';
+import { UserSession } from '../database/entity/UserSession.entity';
 
 class AuthService {
   private verifier;

@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { User } from '../entity/User';
+import { User } from './User.entity';
 import { ROLE } from '../../utils/constant';
 
 @Entity()

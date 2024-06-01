@@ -92,7 +92,7 @@ class LevelService {
   }
 
   public async assign(id: string, achievementIds: string[]): Promise<number> {
-    const student = await this.studentRepository.find({ id });
+    const student = await this.studentRepository.findOne({ where: { id } });
 
     if (!student)
       throwErrorsHttp('Student is not found', httpStatusCode.NOT_FOUND);

@@ -156,12 +156,6 @@ route.delete(
  * Achievement Routes
  */
 route.get(
-  '/api/achievement',
-  authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
-  achievementController.assignedAchievements
-);
-
-route.get(
   '/api/achievement/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
   validate(Validators.paramsId),
@@ -170,7 +164,7 @@ route.get(
 
 route.get(
   '/api/achievements',
-  authenticate(AUTH_STRATEGY.ADMIN),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.APPROVED_STUDENT]),
   achievementController.achievements
 );
 

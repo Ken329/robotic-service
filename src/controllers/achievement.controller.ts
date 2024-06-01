@@ -2,6 +2,7 @@ import { get } from 'lodash';
 import { Request, Response } from 'express';
 import AchievementService from '../services/achievement.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
+import { ROLE } from '../utils/constant';
 
 const achievement = async (req: Request, res: Response) =>
   AchievementService.achievement(req.params.id)
@@ -11,16 +12,24 @@ const achievement = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const achievements = async (req: Request, res: Response) =>
-  AchievementService.achievements()
-    .then((data) =>
-      successApiResponse(res, 'Successfully get achievements', data)
-    )
-    .catch((error) => errorApiResponse(res, error.message));
+  get(req, 'user.role') === ROLE.ADMIN
+    ? AchievementService.achievements()
+        .then((data) =>
+          successApiResponse(res, 'Successfully get achievements', data)
+        )
+        .catch((error) => errorApiResponse(res, error.message))
+    : AchievementService.assignedAchievements(get(req, 'user.studentId'))
+        .then((data) =>
+          successApiResponse(
+            res,
+            'Successfully get assigned achievements for student',
+            data
+          )
+        )
+        .catch((error) => errorApiResponse(res, error.message));
 
 const assignedAchievements = async (req: Request, res: Response) =>
-  AchievementService.assignedAchievements(
-    get(req.user, 'studentId', req.params.studentId)
-  )
+  AchievementService.assignedAchievements(req.params.studentId)
     .then((data) =>
       successApiResponse(res, 'Successfully get assigned achievements', data)
     )

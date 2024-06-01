@@ -1,7 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Response } from 'express';
-import { get, isEmpty, set } from 'lodash';
+import { get, isArray, isEmpty, set } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 
 interface ErrorWithStatus extends Error {
@@ -58,6 +58,8 @@ export const successApiResponse = (
     success: true,
     message
   };
+  if (isArray(payload)) set(response, 'data', payload);
+
   if (!isEmpty(payload)) {
     const nric = get(payload, 'nric', null);
     if (nric) set(payload, 'nric', maskingValue(nric));

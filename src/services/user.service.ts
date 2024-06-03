@@ -180,7 +180,7 @@ class UserService {
       return {
         ...payload,
         name: get(user.student, 'fullName', null),
-        studentId: user.student.id,
+        studentId: get(user.student, 'id', null),
         centerId: get(user.center, 'id', null),
         centerName: get(user.center, 'name', null)
       };

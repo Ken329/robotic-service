@@ -134,6 +134,15 @@ class LevelService {
     const achievement = await this.achievementRepository.findOne({
       where: { id }
     });
+    const assignedAmount = await this.studentAchievementsRepository.find({
+      where: { achievement: id }
+    });
+    if (assignedAmount.length > 0) {
+      throwErrorsHttp(
+        `Achievement is not allow to be deleted as there are ${assignedAmount.length} student assigned to this achievement`,
+        httpStatusCode.BAD_REQUEST
+      );
+    }
     await this.achievementRepository.delete({ id });
     await FileService.delete(achievement.image);
     return true;

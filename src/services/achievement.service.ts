@@ -51,7 +51,7 @@ class LevelService {
   public async achievements(): Promise<AchievementResponse[]> {
     const results = await this.achievementRepository.find();
     return map(results, (result) => ({
-      ...pick(result, ['id', 'title', 'description']),
+      ...pick(result, ['id', 'title', 'description', 'createdAt']),
       imageUrl: `${process.env.APP_URL}/api/file/${result.image}`
     }));
   }
@@ -69,7 +69,8 @@ class LevelService {
       achievementId: assignedAchievent.achievement.id,
       achievementTitle: assignedAchievent.achievement.title,
       achievementDescription: assignedAchievent.achievement.description,
-      achievementImageUrl: `${process.env.APP_URL}/api/file/${assignedAchievent.achievement.image}`
+      achievementImageUrl: `${process.env.APP_URL}/api/file/${assignedAchievent.achievement.image}`,
+      issuedAt: assignedAchievent.createdAt
     }));
   }
 

@@ -25,9 +25,9 @@ type AssignedAchievementResponse = {
 };
 
 class LevelService {
-  private studentRepository;
-  private achievementRepository;
-  private studentAchievementsRepository;
+  private studentRepository: any;
+  private achievementRepository: any;
+  private studentAchievementsRepository: any;
 
   constructor() {
     this.studentRepository = DataSource.getRepository(Student);
@@ -88,7 +88,7 @@ class LevelService {
     const result = await this.achievementRepository.save(achievement);
     return {
       ...pick(result, ['id', 'title', 'description']),
-      imageUrl: `${process.env.APP_URL}/api/file/${result.image}`
+      imageUrl: imageData.url
     };
   }
 

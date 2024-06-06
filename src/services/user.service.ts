@@ -70,8 +70,8 @@ type StudentInfo = {
 };
 
 class UserService {
-  private userRepository;
-  private studentRepository;
+  private userRepository: any;
+  private studentRepository: any;
 
   constructor() {
     this.userRepository = DataSource.getRepository(User);

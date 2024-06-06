@@ -4,7 +4,7 @@ import { CognitoUserPool, CognitoUser } from 'amazon-cognito-identity-js';
 dotenv.config();
 
 class AwsCognitoService {
-  private UserPool;
+  private UserPool: any;
 
   constructor() {
     this.UserPool = new CognitoUserPool({

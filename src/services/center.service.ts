@@ -13,8 +13,8 @@ type CenterResponse = {
 };
 
 class UserService {
-  private centerRepository;
-  private userRepository;
+  private userRepository: any;
+  private centerRepository: any;
 
   constructor() {
     this.userRepository = DataSource.getRepository(User);

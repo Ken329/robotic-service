@@ -221,4 +221,19 @@ route.get(
   fileController.file
 );
 
+route.post(
+  '/api/file/',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  fileProviders.single('file'),
+  fileValidator,
+  fileController.create
+);
+
+route.delete(
+  '/api/file/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  fileController.remove
+);
+
 export default route;

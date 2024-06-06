@@ -11,8 +11,8 @@ type LevelResponse = {
 };
 
 class LevelService {
-  private levelRepository;
-  private studentRepository;
+  private levelRepository: any;
+  private studentRepository: any;
 
   constructor() {
     this.levelRepository = DataSource.getRepository(Level);

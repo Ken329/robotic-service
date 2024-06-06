@@ -12,8 +12,8 @@ import { throwErrorsHttp, encryption, decryption } from '../utils/helpers';
 import { UserSession } from '../database/entity/UserSession.entity';
 
 class AuthService {
-  private verifier;
-  private userSessionRepository;
+  private verifier: any;
+  private userSessionRepository: any;
   private audience = 'Robotic Club Portal';
 
   constructor() {

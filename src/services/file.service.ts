@@ -12,11 +12,12 @@ type FileResponse = {
   type?: string;
   size?: string;
   file?: string;
+  url?: string;
 };
 
 class LevelService {
-  private fileRepository;
-  private achievementRepository;
+  private fileRepository: any;
+  private achievementRepository: any;
 
   constructor() {
     this.fileRepository = DataSource.getRepository(File);
@@ -42,7 +43,10 @@ class LevelService {
     file.file = Buffer.from(payload.buffer).toString('base64');
 
     const result = await this.fileRepository.save(file);
-    return pick(result, ['id', 'name', 'type', 'size']);
+    return {
+      ...pick(result, ['id', 'name', 'type', 'size']),
+      url: `${process.env.APP_URL}/api/file/${result.id}`
+    };
   }
 
   public async delete(id: string): Promise<boolean> {

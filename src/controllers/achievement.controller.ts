@@ -47,7 +47,7 @@ const assign = async (req: Request, res: Response) =>
     .then((data) =>
       successApiResponse(
         res,
-        `Successfully assign ${data} achievements for student`
+        `Successfully assign ${data.assigned} achievements and remove ${data.removed} achievements for student`
       )
     )
     .catch((error) => errorApiResponse(res, error.message));

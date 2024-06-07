@@ -27,7 +27,7 @@ jobs:
         run: sudo docker rm -f robotic-backend || true
 
       - name: Run new docker container
-        run: sudo docker run -d -p 8080:8080 --name robotic-backend --env-file ./.env kenliau0329/robotic-backend
+        run: sudo docker run -d -p 8080:8080 --name robotic-backend --restart unless-stopped --env-file ./.env kenliau0329/robotic-backend
 
       - name: Patch secret file
         run: |

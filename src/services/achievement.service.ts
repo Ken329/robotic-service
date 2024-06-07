@@ -1,4 +1,5 @@
-import { get, map, pick } from 'lodash';
+import { In, Not } from 'typeorm';
+import { find, get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import FileService from './file.service';
 import DataSource from '../database/dataSource';
@@ -7,7 +8,6 @@ import { FileProviderRequest } from '../utils/constant';
 import { Student } from '../database/entity/Student.entity';
 import { Achievement } from '../database/entity/Achievement.entity';
 import { StudentAchievements } from '../database/entity/StudentAchievements.entity';
-import { In } from 'typeorm';
 
 type AchievementResponse = {
   id: string;
@@ -92,7 +92,10 @@ class LevelService {
     };
   }
 
-  public async assign(id: string, achievementIds: string[]): Promise<number> {
+  public async assign(
+    id: string,
+    achievementIds: string[]
+  ): Promise<{ assigned: number; removed: number }> {
     const student = await this.studentRepository.findOne({ where: { id } });
 
     if (!student)
@@ -103,17 +106,32 @@ class LevelService {
       select: { id: true }
     });
 
-    const assignedAchievements = [];
+    const studentAchievements = await this.studentAchievementsRepository.find({
+      where: { student: id }
+    });
+
+    const allAchievements = [];
+    const newAchievements = [];
     for (let i = 0; i < achievements.length; i += 1) {
-      assignedAchievements.push({
-        student: id,
-        achievement: get(achievements, `[${i}].id`)
-      });
+      const achievement = get(achievements, `[${i}].id`);
+      if (!find(studentAchievements, (el) => el.achievement === achievement)) {
+        newAchievements.push({
+          student: id,
+          achievement
+        });
+      }
+      allAchievements.push(achievement);
     }
 
-    await this.studentAchievementsRepository.delete({ student: id });
-    this.studentAchievementsRepository.insert(assignedAchievements);
-    return assignedAchievements.length;
+    await this.studentAchievementsRepository.delete({
+      student: id,
+      achievement: Not(In(allAchievements))
+    });
+    this.studentAchievementsRepository.insert(newAchievements);
+    return {
+      assigned: newAchievements.length,
+      removed: Math.max(0, studentAchievements.length - allAchievements.length)
+    };
   }
 
   public async update(

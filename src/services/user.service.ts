@@ -186,7 +186,7 @@ class UserService {
       };
     });
 
-    this.userRepository.update(
+    await this.userRepository.update(
       { id: In(expiredStudent) },
       { status: USER_STATUS.EXPIRED }
     );

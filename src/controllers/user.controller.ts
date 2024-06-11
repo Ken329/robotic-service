@@ -6,11 +6,17 @@ import CenterService from '../services/center.service';
 import { errorApiResponse, successApiResponse } from '../utils/helpers';
 
 const user = async (req: Request, res: Response) =>
-  successApiResponse(res, 'Successfully get user', req.user);
+  successApiResponse(res, 'Successfully get user', req.user, {
+    maskNric: false
+  });
 
 const getUser = async (req: Request, res: Response) =>
   UserService.user(req.params.id, pick(req.user, ['centerId']))
-    .then((data) => successApiResponse(res, 'Successfully get user info', data))
+    .then((data) =>
+      successApiResponse(res, 'Successfully get user info', data, {
+        maskNric: get(req.user, 'role', null) !== ROLE.ADMIN
+      })
+    )
     .catch((error) => errorApiResponse(res, error.message));
 
 const getStudents = async (req: Request, res: Response) =>

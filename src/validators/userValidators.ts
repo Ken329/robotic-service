@@ -64,6 +64,11 @@ const studentCreation = z.object({
       .string({ required_error: 'Passport is required' })
       .optional()
       .or(emptyStringToNull),
+    personalEmail: z
+      .string({ required_error: 'Personal email is required' })
+      .email('Personal email is not valid')
+      .optional()
+      .or(emptyStringToNull),
     contact: z
       .string({ required_error: 'Contact is required' })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
@@ -165,6 +170,11 @@ const studentUpdate = z.object({
       .regex(DOB_REGEX, 'Invalid DOB format eg: 12/12/2000')
       .optional()
       .or(emptyStringToNull),
+    personalEmail: z
+      .string({ required_error: 'Personal email is required' })
+      .email('Personal email is not valid')
+      .optional()
+      .or(emptyStringToNull),
     contact: z
       .string({ required_error: 'Contact is required' })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789')
@@ -214,6 +224,11 @@ const studentUpdate = z.object({
     level: z
       .string({ required_error: 'Level is required' })
       .uuid('Level is not valid')
+      .optional()
+      .or(emptyStringToNull),
+    roboticId: z
+      .string({ required_error: 'Robotic ID is required' })
+      .uuid('Robotic ID is not valid')
       .optional()
       .or(emptyStringToNull)
   })

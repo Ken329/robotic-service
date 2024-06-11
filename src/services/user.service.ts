@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import moment from 'moment';
 import { In } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
-import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import { find, get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
 import CenterService from './center.service';
 import AwsCognitoService from './awsCognito.service';
@@ -23,6 +23,7 @@ export type UserResponse = {
   email: string;
   role: string;
   status: USER_STATUS;
+  roboticId?: string;
   level?: string;
   levelName?: string;
   centerId?: string;
@@ -48,6 +49,7 @@ export type UserResponse = {
 };
 
 type StudentInfo = {
+  roboticId?: string;
   level?: string;
   center?: string;
   nric?: string;
@@ -56,6 +58,7 @@ type StudentInfo = {
   fullName?: string;
   gender?: string;
   dob?: string;
+  personalEmail?: string;
   contact?: string;
   race?: string;
   moeEmail?: string;
@@ -106,6 +109,7 @@ class UserService {
     const studentDetails = user.student
       ? {
           studentId: user.student.id,
+          roboticId: user.student.roboticId,
           fullName: user.student.fullName,
           level: user.student.level,
           size: user.student.size,
@@ -113,6 +117,7 @@ class UserService {
           dob: user.student.dob,
           nric: user.student.nric,
           passport: user.student.passport,
+          personalEmail: user.student.personalEmail,
           contact: user.student.contact,
           moeEmail: user.student.moeEmail,
           race: user.student.race,
@@ -181,6 +186,7 @@ class UserService {
         ...payload,
         name: get(user.student, 'fullName', null),
         studentId: get(user.student, 'id', null),
+        roboticId: get(user.student, 'roboticId', null),
         centerId: get(user.center, 'id', null),
         centerName: get(user.center, 'name', null)
       };
@@ -211,6 +217,18 @@ class UserService {
   ): Promise<UserResponse> {
     const centerId = get(payload, 'center', null);
     const center = await CenterService.center(centerId);
+
+    if (
+      !find(
+        [
+          get(payload, 'parentEmail', null),
+          get(payload, 'personalEmail', null)
+        ],
+        (el) => el === email
+      )
+    ) {
+      throwErrorsHttp('Email is not valid', httpStatusCode.BAD_REQUEST);
+    }
 
     if ((role === ROLE.CENTER || role === ROLE.STUDENT) && !center) {
       throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);
@@ -252,6 +270,7 @@ class UserService {
         student.nric = payload.nric;
         student.size = payload.size;
         student.passport = payload.passport;
+        student.personalEmail = payload.personalEmail;
         student.contact = payload.contact;
         student.race = payload.race;
         student.fullName = payload.fullName;
@@ -289,6 +308,7 @@ class UserService {
     const user = await this.user(id, where);
 
     const filterPayload = pick(payload, [
+      'roboticId',
       'level',
       'nric',
       'size',
@@ -296,6 +316,7 @@ class UserService {
       'fullName',
       'gender',
       'dob',
+      'personalEmail',
       'contact',
       'race',
       'moeEmail',
@@ -372,9 +393,12 @@ class UserService {
     payload: StudentInfo,
     userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
-    if (userInfo.role === ROLE.CENTER && !get(payload, 'level', null)) {
+    if (
+      userInfo.role === ROLE.CENTER &&
+      (!get(payload, 'level', null) || !get(payload, 'roboticId', null))
+    ) {
       throwErrorsHttp(
-        'Level is required upon approval',
+        'Level & Robotic ID is required upon approval',
         httpStatusCode.BAD_REQUEST
       );
     }

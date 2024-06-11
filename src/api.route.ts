@@ -195,8 +195,10 @@ route.put(
 route.put(
   '/api/achievement/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.achievementValidators.update),
+  fileProviders.single('file'),
+  fileValidator,
   validate(Validators.paramsId),
+  validate(Validators.achievementValidators.update),
   achievementController.update
 );
 

@@ -13,6 +13,7 @@ type AchievementResponse = {
   id: string;
   title: string;
   description: string;
+  image?: string;
   imageUrl: string;
 };
 
@@ -43,7 +44,7 @@ class LevelService {
       throwErrorsHttp('Achievement is not found', httpStatusCode.NOT_FOUND);
 
     return {
-      ...pick(result, ['id', 'title', 'description']),
+      ...pick(result, ['id', 'title', 'description', 'image']),
       imageUrl: `${process.env.APP_URL}/api/file/${result.image}`
     };
   }
@@ -70,6 +71,7 @@ class LevelService {
       achievementTitle: assignedAchievent.achievement.title,
       achievementDescription: assignedAchievent.achievement.description,
       achievementImageUrl: `${process.env.APP_URL}/api/file/${assignedAchievent.achievement.image}`,
+      achievementCreationDate: assignedAchievent.achievement.createdAt,
       issuedAt: assignedAchievent.createdAt
     }));
   }
@@ -136,17 +138,17 @@ class LevelService {
 
   public async update(
     id: string,
-    payload: { title: string; description: string }
+    payload: { title: string; description: string },
+    file?: FileProviderRequest
   ): Promise<AchievementResponse> {
     const achievement = await this.achievement(id);
+
+    if (file) FileService.update(achievement.image, file);
 
     const filterPayload = pick(payload, ['title', 'description']);
     await this.achievementRepository.update({ id }, filterPayload);
 
-    return {
-      ...achievement,
-      ...filterPayload
-    };
+    return { ...achievement, ...filterPayload };
   }
 
   public async delete(id: string): Promise<boolean> {

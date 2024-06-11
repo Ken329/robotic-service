@@ -49,6 +49,24 @@ class LevelService {
     };
   }
 
+  public async update(
+    id: string,
+    payload: FileProviderRequest
+  ): Promise<FileResponse> {
+    const updatedFile = {
+      name: payload.originalname,
+      type: payload.mimetype,
+      size: payload.size,
+      file: Buffer.from(payload.buffer).toString('base64')
+    };
+
+    const result = await this.fileRepository.update({ id }, updatedFile);
+    return {
+      ...pick(result, ['id', 'name', 'type', 'size']),
+      url: `${process.env.APP_URL}/api/file/${result.id}`
+    };
+  }
+
   public async delete(id: string): Promise<boolean> {
     const achievement = await this.achievementRepository.findAndCount({
       where: { image: id }

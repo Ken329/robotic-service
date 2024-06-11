@@ -22,6 +22,9 @@ export class Student {
   @Column({ type: 'uuid' })
   user: string;
 
+  @Column({ nullable: true })
+  roboticId: string;
+
   @ManyToOne(() => Level, (level) => level.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'level' })
   @Column({ type: 'uuid', nullable: true })
@@ -32,6 +35,9 @@ export class Student {
 
   @Column({ nullable: true })
   passport: string;
+
+  @Column({ nullable: true })
+  personalEmail: string;
 
   @Column({ nullable: true })
   contact: string;

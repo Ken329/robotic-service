@@ -228,7 +228,7 @@ const studentUpdate = z.object({
       .or(emptyStringToNull),
     roboticId: z
       .string({ required_error: 'Robotic ID is required' })
-      .uuid('Robotic ID is not valid')
+      .min(1, { message: 'Robotic ID should not be empty' })
       .optional()
       .or(emptyStringToNull)
   })

@@ -455,7 +455,7 @@ class UserService {
     set(payload, 'expiryDate', moment().endOf('year').toDate());
     const userDetails = await this.updateStudent(id, payload);
 
-    userDetails.status = USER_STATUS.APPROVED;
+    userDetails.status = USER_STATUS.PENDING_CENTER;
     await this.update(id, userDetails.status);
 
     return userDetails;

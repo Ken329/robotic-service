@@ -136,11 +136,11 @@ const signUpReject = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const renewMembership = async (req: Request, res: Response) =>
-  UserService.renew(req.params.id, req.body)
+  UserService.renew(get(req.user, 'id'), req.body)
     .then((data) =>
       successApiResponse(
         res,
-        `Successfully renew membership for ${req.params.id}`,
+        `Successfully renew membership for ${get(req.user, 'id')}`,
         data
       )
     )

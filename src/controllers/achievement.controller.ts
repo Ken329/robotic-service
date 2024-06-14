@@ -53,7 +53,7 @@ const assign = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const update = async (req: Request, res: Response) =>
-  AchievementService.update(req.params.id, req.body)
+  AchievementService.update(req.params.id, req.body, req.file)
     .then((data) =>
       successApiResponse(res, 'Successfully update achievement', data)
     )

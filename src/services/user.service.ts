@@ -23,6 +23,7 @@ export type UserResponse = {
   email: string;
   role: string;
   status: USER_STATUS;
+  roboticId?: string;
   level?: string;
   levelName?: string;
   centerId?: string;
@@ -48,6 +49,7 @@ export type UserResponse = {
 };
 
 type StudentInfo = {
+  roboticId?: string;
   level?: string;
   center?: string;
   nric?: string;
@@ -56,6 +58,7 @@ type StudentInfo = {
   fullName?: string;
   gender?: string;
   dob?: string;
+  personalEmail?: string;
   contact?: string;
   race?: string;
   moeEmail?: string;
@@ -106,6 +109,7 @@ class UserService {
     const studentDetails = user.student
       ? {
           studentId: user.student.id,
+          roboticId: user.student.roboticId,
           fullName: user.student.fullName,
           level: user.student.level,
           size: user.student.size,
@@ -113,6 +117,7 @@ class UserService {
           dob: user.student.dob,
           nric: user.student.nric,
           passport: user.student.passport,
+          personalEmail: user.student.personalEmail,
           contact: user.student.contact,
           moeEmail: user.student.moeEmail,
           race: user.student.race,
@@ -181,6 +186,7 @@ class UserService {
         ...payload,
         name: get(user.student, 'fullName', null),
         studentId: get(user.student, 'id', null),
+        roboticId: get(user.student, 'roboticId', null),
         centerId: get(user.center, 'id', null),
         centerName: get(user.center, 'name', null)
       };
@@ -252,6 +258,7 @@ class UserService {
         student.nric = payload.nric;
         student.size = payload.size;
         student.passport = payload.passport;
+        student.personalEmail = payload.personalEmail;
         student.contact = payload.contact;
         student.race = payload.race;
         student.fullName = payload.fullName;
@@ -289,6 +296,7 @@ class UserService {
     const user = await this.user(id, where);
 
     const filterPayload = pick(payload, [
+      'roboticId',
       'level',
       'nric',
       'size',
@@ -296,6 +304,7 @@ class UserService {
       'fullName',
       'gender',
       'dob',
+      'personalEmail',
       'contact',
       'race',
       'moeEmail',
@@ -372,9 +381,12 @@ class UserService {
     payload: StudentInfo,
     userInfo: { role?: ROLE; centerId?: string }
   ): Promise<UserResponse> {
-    if (userInfo.role === ROLE.CENTER && !get(payload, 'level', null)) {
+    if (
+      userInfo.role === ROLE.CENTER &&
+      (!get(payload, 'level', null) || !get(payload, 'roboticId', null))
+    ) {
       throwErrorsHttp(
-        'Level is required upon approval',
+        'Level & Robotic ID is required upon approval',
         httpStatusCode.BAD_REQUEST
       );
     }
@@ -431,7 +443,7 @@ class UserService {
     set(payload, 'expiryDate', moment().endOf('year').toDate());
     const userDetails = await this.updateStudent(id, payload);
 
-    userDetails.status = USER_STATUS.APPROVED;
+    userDetails.status = USER_STATUS.PENDING_CENTER;
     await this.update(id, userDetails.status);
 
     return userDetails;

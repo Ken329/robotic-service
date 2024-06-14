@@ -121,9 +121,8 @@ route.post(
 );
 
 route.post(
-  '/api/user/:id/renew',
-  authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.paramsId),
+  '/api/user/renew',
+  authenticate(AUTH_STRATEGY.STUDENT),
   validate(Validators.userValidators.studentUpdate),
   userController.renewMembership
 );
@@ -195,8 +194,10 @@ route.put(
 route.put(
   '/api/achievement/:id',
   authenticate(AUTH_STRATEGY.ADMIN),
-  validate(Validators.achievementValidators.update),
+  fileProviders.single('file'),
+  fileValidator,
   validate(Validators.paramsId),
+  validate(Validators.achievementValidators.update),
   achievementController.update
 );
 
@@ -210,16 +211,7 @@ route.delete(
 /**
  * File Routes
  */
-route.get(
-  '/api/file/:id',
-  authenticate([
-    AUTH_STRATEGY.ADMIN,
-    AUTH_STRATEGY.CENTER,
-    AUTH_STRATEGY.APPROVED_STUDENT
-  ]),
-  validate(Validators.paramsId),
-  fileController.file
-);
+route.get('/api/file/:id', validate(Validators.paramsId), fileController.file);
 
 route.post(
   '/api/file/',

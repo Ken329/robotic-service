@@ -52,17 +52,20 @@ export const successApiResponse = (
   res: Response,
   message: string,
   payload?: any,
-  statusCode = httpStatusCode.OK
+  options?: {
+    statusCode?: number;
+    maskNric?: boolean;
+  }
 ) => {
-  const response = {
-    success: true,
-    message
-  };
+  const statusCode = get(options, 'statusCode', httpStatusCode.OK);
+  const maskNric = get(options, 'maskNric', true);
+
+  const response = { success: true, message };
   if (isArray(payload)) set(response, 'data', payload);
 
   if (!isEmpty(payload)) {
     const nric = get(payload, 'nric', null);
-    if (nric) set(payload, 'nric', maskingValue(nric));
+    if (nric) set(payload, 'nric', maskNric ? maskingValue(nric) : nric);
     set(response, 'data', payload);
   }
   return res.status(statusCode).json(response);

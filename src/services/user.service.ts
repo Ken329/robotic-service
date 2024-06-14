@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import moment from 'moment';
 import { In } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
-import { find, get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
 import CenterService from './center.service';
 import AwsCognitoService from './awsCognito.service';
@@ -217,18 +217,6 @@ class UserService {
   ): Promise<UserResponse> {
     const centerId = get(payload, 'center', null);
     const center = await CenterService.center(centerId);
-
-    if (
-      !find(
-        [
-          get(payload, 'parentEmail', null),
-          get(payload, 'personalEmail', null)
-        ],
-        (el) => el === email
-      )
-    ) {
-      throwErrorsHttp('Email is not valid', httpStatusCode.BAD_REQUEST);
-    }
 
     if ((role === ROLE.CENTER || role === ROLE.STUDENT) && !center) {
       throwErrorsHttp('Center is not valid', httpStatusCode.BAD_REQUEST);

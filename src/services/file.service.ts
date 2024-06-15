@@ -1,4 +1,4 @@
-import { get, pick } from 'lodash';
+import { get, pick, map } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
@@ -24,7 +24,7 @@ class LevelService {
     this.achievementRepository = DataSource.getRepository(Achievement);
   }
 
-  public async file(
+  public async find(
     id: string,
     attributes = ['id', 'name', 'type', 'size', 'file']
   ): Promise<FileResponse> {
@@ -33,6 +33,15 @@ class LevelService {
     if (!result) throwErrorsHttp('File is not found', httpStatusCode.NOT_FOUND);
 
     return pick(result, attributes);
+  }
+
+  public async findAll(): Promise<FileResponse[]> {
+    const result = await this.fileRepository.find();
+
+    return map(result, (el) => ({
+      ...pick(el, ['name', 'type', 'size']),
+      url: `${process.env.APP_URL}/api/file/${el.id}`
+    }));
   }
 
   public async create(payload: FileProviderRequest): Promise<FileResponse> {

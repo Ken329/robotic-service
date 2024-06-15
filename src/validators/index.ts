@@ -2,10 +2,11 @@ import { get, map } from 'lodash';
 import { z, AnyZodObject } from 'zod';
 import httpStatusCode from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
-import authValidators from './authValidators';
-import userValidators from './userValidators';
-import levelValidators from './levelValidators';
-import achievementValidators from './achievementValidators';
+import blogValidator from './blog.validator';
+import authValidators from './auth.validator';
+import userValidators from './user.validator';
+import levelValidators from './level.validator';
+import achievementValidators from './achievement.validator';
 import { errorApiResponse } from '../utils/helpers';
 
 export const validate =
@@ -72,6 +73,7 @@ const paramsStudentId = z.object({
 
 export default {
   paramsId,
+  blogValidator,
   paramsStudentId,
   authValidators,
   userValidators,

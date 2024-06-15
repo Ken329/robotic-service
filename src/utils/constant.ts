@@ -47,6 +47,17 @@ export enum TSHIRT_SIZE {
   'xl' = 'XL'
 }
 
+export enum BLOG_CATEGORY {
+  GENERAL = 'general',
+  EXERCISE = 'exercise',
+  COMPETITION = 'competition'
+}
+
+export enum BLOG_TYPE {
+  NORMAL = 'normal',
+  PRIORITY = 'priority'
+}
+
 export const CONTACT_REGEX = new RegExp(
   /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$/
 );

@@ -4,6 +4,7 @@ import fileProviders from './providers/file.provider';
 import authController from './controllers/auth.controller';
 import userController from './controllers/user.controller';
 import fileController from './controllers/file.controller';
+import blogController from './controllers/blog.controller';
 import levelController from './controllers/level.controller';
 import centerController from './controllers/center.controller';
 import { authenticate, AUTH_STRATEGY } from './providers/auth.provider';
@@ -211,10 +212,16 @@ route.delete(
 /**
  * File Routes
  */
-route.get('/api/file/:id', validate(Validators.paramsId), fileController.file);
+route.get('/api/file/:id', validate(Validators.paramsId), fileController.find);
+
+route.get(
+  '/api/file',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  fileController.findAll
+);
 
 route.post(
-  '/api/file/',
+  '/api/file',
   authenticate(AUTH_STRATEGY.ADMIN),
   fileProviders.single('file'),
   fileValidator,
@@ -226,6 +233,64 @@ route.delete(
   authenticate(AUTH_STRATEGY.ADMIN),
   validate(Validators.paramsId),
   fileController.remove
+);
+
+/**
+ * File Routes
+ */
+route.get(
+  '/api/blog/:id',
+  authenticate([
+    AUTH_STRATEGY.ADMIN,
+    AUTH_STRATEGY.CENTER,
+    AUTH_STRATEGY.APPROVED_STUDENT
+  ]),
+  validate(Validators.paramsId),
+  blogController.find
+);
+
+route.get(
+  '/api/blog',
+  authenticate([
+    AUTH_STRATEGY.ADMIN,
+    AUTH_STRATEGY.CENTER,
+    AUTH_STRATEGY.APPROVED_STUDENT
+  ]),
+  blogController.findAll
+);
+
+route.get(
+  '/api/blog/type',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  blogController.type
+);
+
+route.get(
+  '/api/blog/category',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  blogController.category
+);
+
+route.post(
+  '/api/blog',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.blogValidator.create),
+  blogController.create
+);
+
+route.put(
+  '/api/blog/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  validate(Validators.blogValidator.update),
+  blogController.update
+);
+
+route.delete(
+  '/api/blog/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  blogController.remove
 );
 
 export default route;

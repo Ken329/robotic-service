@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { User } from './entity/User.entity';
 import { File } from './entity/File.entity';
+import { Blog } from './entity/Blog.entity';
 import { Level } from './entity/Level.entity';
 import { Center } from './entity/Center.entity';
 import { Student } from './entity/Student.entity';
@@ -24,6 +25,7 @@ const dbConnection = new DataSource({
   entities: [
     User,
     File,
+    Blog,
     Level,
     Center,
     Student,

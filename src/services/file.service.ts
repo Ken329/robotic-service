@@ -39,7 +39,7 @@ class LevelService {
     const result = await this.fileRepository.find();
 
     return map(result, (el) => ({
-      ...pick(el, ['name', 'type', 'size']),
+      ...pick(el, ['id', 'name', 'type', 'size']),
       url: `${process.env.APP_URL}/api/file/${el.id}`
     }));
   }

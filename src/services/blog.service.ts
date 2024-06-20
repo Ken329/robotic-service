@@ -13,6 +13,7 @@ type BlogResponse = {
   assigned: string;
   views: number;
   url: string;
+  createdAt: string;
   content?: string;
 };
 
@@ -44,7 +45,8 @@ class BlogService {
         'type',
         'assigned',
         'content',
-        'views'
+        'views',
+        'createdAt'
       ]),
       url: `${process.env.APP_URL}/api/file/${result.coverImage}`
     };
@@ -88,7 +90,8 @@ class BlogService {
       ) {
         return {
           ...pick(el, ['id', 'title', 'category', 'type', 'assigned', 'views']),
-          url: `${process.env.APP_URL}/api/file/${el.coverImage}`
+          url: `${process.env.APP_URL}/api/file/${el.coverImage}`,
+          createdAt: el.createdAt
         };
       }
       return null;
@@ -116,7 +119,8 @@ class BlogService {
     const result = await this.blogRepository.save(blog);
     return {
       ...pick(result, ['id', 'title', 'category', 'type', 'assigned', 'views']),
-      url: `${process.env.APP_URL}/api/file/${result.coverImage}`
+      url: `${process.env.APP_URL}/api/file/${result.coverImage}`,
+      createdAt: result.createdAt
     };
   }
 
@@ -141,7 +145,8 @@ class BlogService {
       'assigned',
       'content',
       'coverImage',
-      'views'
+      'views',
+      'createdAt'
     ]);
     if (updatedPayload.assigned)
       set(

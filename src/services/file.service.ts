@@ -1,8 +1,10 @@
 import { get, pick, map } from 'lodash';
+import ExcelJs from 'exceljs';
 import httpStatusCode from 'http-status-codes';
+import UserService from './user.service';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
-import { FileProviderRequest } from '../utils/constant';
+import { FileProviderRequest, ROLE } from '../utils/constant';
 import { File } from '../database/entity/File.entity';
 import { Achievement } from '../database/entity/Achievement.entity';
 
@@ -90,6 +92,51 @@ class LevelService {
 
     await this.fileRepository.delete({ id });
     return true;
+  }
+
+  public async generateExcel(): Promise<any> {
+    const workbook = new ExcelJs.Workbook();
+    workbook.creator = 'Robotic SteamCup';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    workbook.views = [
+      {
+        x: 0,
+        y: 0,
+        width: 10000,
+        height: 20000,
+        firstSheet: 0,
+        activeTab: 0,
+        visibility: 'visible'
+      }
+    ];
+
+    const worksheet = workbook.addWorksheet('Students');
+    worksheet.columns = [
+      { header: 'Id', key: 'id', width: 40 },
+      { header: 'Name', key: 'name', width: 32 },
+      { header: 'email', key: 'email', width: 32 },
+      { header: 'Robotic ID', key: 'roboticId', width: 32 },
+      { header: 'Status', key: 'status', width: 20 },
+      { header: 'Center', key: 'centerName', width: 20 }
+    ];
+
+    const { data } = await UserService.users(ROLE.STUDENT, {});
+
+    for (let i = 0; i < data.length; i += 1) {
+      worksheet.addRow(
+        pick(get(data, i), [
+          'id',
+          'email',
+          'status',
+          'name',
+          'roboticId',
+          'centerName'
+        ])
+      );
+    }
+
+    return workbook.xlsx.writeBuffer();
   }
 }
 

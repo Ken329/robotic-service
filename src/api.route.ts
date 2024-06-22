@@ -212,13 +212,20 @@ route.delete(
 /**
  * File Routes
  */
-route.get('/api/file/:id', validate(Validators.paramsId), fileController.find);
 
 route.get(
   '/api/file',
   authenticate(AUTH_STRATEGY.ADMIN),
   fileController.findAll
 );
+
+route.get(
+  '/api/file/excel',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  fileController.generateExcel
+);
+
+route.get('/api/file/:id', validate(Validators.paramsId), fileController.find);
 
 route.post(
   '/api/file',

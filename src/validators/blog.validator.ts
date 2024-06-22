@@ -17,6 +17,9 @@ const create = z.object({
     type: z.enum([BLOG_TYPE.NORMAL, BLOG_TYPE.PRIORITY], {
       required_error: 'Type is required'
     }),
+    description: z
+      .string({ required_error: 'Description is required' })
+      .min(1, { message: 'Description should not be empty' }),
     assigned: z
       .string({ required_error: 'Assigned is required' })
       .min(1, { message: 'Assigned should not be empty' }),
@@ -49,6 +52,10 @@ const update = z.object({
       .enum([BLOG_TYPE.NORMAL, BLOG_TYPE.PRIORITY], {
         required_error: 'Type is required'
       })
+      .optional(),
+    description: z
+      .string({ required_error: 'Description is required' })
+      .min(1, { message: 'Description should not be empty' })
       .optional(),
     assigned: z
       .string({ required_error: 'Assigned is required' })

@@ -10,6 +10,7 @@ type BlogResponse = {
   title: string;
   category: string;
   type: string;
+  description: string;
   assigned: string;
   views: number;
   url: string;
@@ -43,6 +44,7 @@ class BlogService {
         'title',
         'category',
         'type',
+        'description',
         'assigned',
         'content',
         'views',
@@ -89,7 +91,15 @@ class BlogService {
         )
       ) {
         return {
-          ...pick(el, ['id', 'title', 'category', 'type', 'assigned', 'views']),
+          ...pick(el, [
+            'id',
+            'title',
+            'category',
+            'type',
+            'description',
+            'assigned',
+            'views'
+          ]),
           url: `${process.env.APP_URL}/api/file/${el.coverImage}`,
           createdAt: el.createdAt
         };
@@ -104,6 +114,7 @@ class BlogService {
     title: string;
     category: BLOG_CATEGORY;
     type: BLOG_TYPE;
+    description: string;
     assigned: string;
     coverImage: string;
     content: string;
@@ -112,13 +123,22 @@ class BlogService {
     blog.title = payload.title;
     blog.category = payload.category;
     blog.type = payload.type;
+    blog.description = payload.description;
     blog.assigned = payload.assigned.replaceAll(' ', '');
     blog.coverImage = payload.coverImage;
     blog.content = payload.content;
 
     const result = await this.blogRepository.save(blog);
     return {
-      ...pick(result, ['id', 'title', 'category', 'type', 'assigned', 'views']),
+      ...pick(result, [
+        'id',
+        'title',
+        'category',
+        'type',
+        'description',
+        'assigned',
+        'views'
+      ]),
       url: `${process.env.APP_URL}/api/file/${result.coverImage}`,
       createdAt: result.createdAt
     };
@@ -130,6 +150,7 @@ class BlogService {
       title?: string;
       category?: BLOG_CATEGORY;
       type?: BLOG_TYPE;
+      description?: string;
       assigned?: string;
       coverImage?: string;
       content?: string;
@@ -142,6 +163,7 @@ class BlogService {
       'title',
       'category',
       'type',
+      'description',
       'assigned',
       'content',
       'coverImage',

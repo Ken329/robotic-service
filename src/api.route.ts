@@ -246,17 +246,6 @@ route.delete(
  * File Routes
  */
 route.get(
-  '/api/blog/:id',
-  authenticate([
-    AUTH_STRATEGY.ADMIN,
-    AUTH_STRATEGY.CENTER,
-    AUTH_STRATEGY.APPROVED_STUDENT
-  ]),
-  validate(Validators.paramsId),
-  blogController.find
-);
-
-route.get(
   '/api/blog',
   authenticate([
     AUTH_STRATEGY.ADMIN,
@@ -276,6 +265,17 @@ route.get(
   '/api/blog/category',
   authenticate(AUTH_STRATEGY.ADMIN),
   blogController.category
+);
+
+route.get(
+  '/api/blog/:id',
+  authenticate([
+    AUTH_STRATEGY.ADMIN,
+    AUTH_STRATEGY.CENTER,
+    AUTH_STRATEGY.APPROVED_STUDENT
+  ]),
+  validate(Validators.paramsId),
+  blogController.find
 );
 
 route.post(

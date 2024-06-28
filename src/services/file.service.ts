@@ -6,6 +6,7 @@ import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest, ROLE } from '../utils/constant';
 import { File } from '../database/entity/File.entity';
 import { User } from '../database/entity/User.entity';
+import { Blog } from '../database/entity/Blog.entity';
 import { Achievement } from '../database/entity/Achievement.entity';
 
 type FileResponse = {
@@ -20,11 +21,13 @@ type FileResponse = {
 class LevelService {
   private fileRepository: any;
   private userRepository: any;
+  private blogRepository: any;
   private achievementRepository: any;
 
   constructor() {
     this.fileRepository = DataSource.getRepository(File);
     this.userRepository = DataSource.getRepository(User);
+    this.blogRepository = DataSource.getRepository(Blog);
     this.achievementRepository = DataSource.getRepository(Achievement);
   }
 
@@ -88,6 +91,17 @@ class LevelService {
     if (achievementAmount > 0) {
       throwErrorsHttp(
         `File is not allow to be deleted as there are ${achievementAmount} achievement assigned to this file`,
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    const blog = await this.blogRepository.findAndCount({
+      where: { coverImage: id }
+    });
+    const blogAmount = get(blog, 1);
+    if (blogAmount > 0) {
+      throwErrorsHttp(
+        `File is not allow to be deleted as there are ${blogAmount} blog assigned to this file`,
         httpStatusCode.BAD_REQUEST
       );
     }

@@ -9,6 +9,7 @@ import levelController from './controllers/level.controller';
 import centerController from './controllers/center.controller';
 import { authenticate, AUTH_STRATEGY } from './providers/auth.provider';
 import achievementController from './controllers/achievement.controller';
+import participantsController from './controllers/participants.controller';
 
 const route: Application = Express();
 
@@ -299,5 +300,35 @@ route.delete(
   validate(Validators.paramsId),
   blogController.remove
 );
+
+/**
+ * Participants Routes
+ */
+// route.get(
+//   '/api/blog/category',
+//   authenticate(AUTH_STRATEGY.ADMIN),
+//   blogController.category
+// );
+
+route.get(
+  '/api/participants/:id',
+  authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
+  validate(Validators.paramsId),
+  participantsController.find
+);
+
+route.post(
+  '/api/participants/:id',
+  authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
+  validate(Validators.paramsId),
+  participantsController.create
+);
+
+// route.delete(
+//   '/api/blog/:id',
+//   authenticate(AUTH_STRATEGY.ADMIN),
+//   validate(Validators.paramsId),
+//   blogController.remove
+// );
 
 export default route;

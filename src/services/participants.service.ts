@@ -1,0 +1,118 @@
+import { pick } from 'lodash';
+import httpStatusCode from 'http-status-codes';
+import BlogService from './blog.service';
+import DataSource from '../database/dataSource';
+import { throwErrorsHttp } from '../utils/helpers';
+import { Participants } from '../database/entity/Participants.entity';
+import { BLOG_CATEGORY } from '../utils/constant';
+
+type ParticipantsResponse = {
+  id: string;
+  blogId: string;
+  studentId: string;
+};
+
+class ParticipantsService {
+  private participantsRepository: any;
+
+  constructor() {
+    this.participantsRepository = DataSource.getRepository(Participants);
+  }
+
+  public async find(
+    blogId: string,
+    studentId: string
+  ): Promise<ParticipantsResponse> {
+    const result = await this.participantsRepository.findOne({
+      where: { blogId, studentId }
+    });
+
+    if (!result) return null;
+
+    return pick(result, ['id', 'blogId', 'studentId']);
+  }
+
+  public async findAllById(blogId: String): Promise<
+    {
+      title: string;
+      id: string;
+      studentId: string;
+      email: string;
+      levelName: string;
+      centerName: string;
+    }[]
+  > {
+    const result = await this.participantsRepository.find({
+      where: { blogId },
+      relations: ['blogId', 'studentId.level', 'studentId.user.center'],
+      select: {
+        blogId: {
+          title: true
+        },
+        studentId: {
+          id: true,
+          user: {
+            id: true,
+            email: true,
+            center: {
+              name: true
+            }
+          },
+          level: {
+            name: true
+          }
+        }
+      }
+    });
+
+    return result.map(
+      (el: {
+        blogId: { title: string };
+        studentId: {
+          id: string;
+          level: { name: string };
+          user: { id: string; email: string; center: { name: string } };
+        };
+      }) => ({
+        title: el.blogId.title,
+        id: el.studentId.user.id,
+        studentId: el.studentId.id,
+        email: el.studentId.user.email,
+        levelName: el.studentId.level.name,
+        centerName: el.studentId.user.center.name
+      })
+    );
+  }
+
+  public async create(
+    blogId: string,
+    studentId: string
+  ): Promise<ParticipantsResponse> {
+    const blog = await BlogService.find(blogId);
+
+    if (blog.category !== BLOG_CATEGORY.COMPETITION) {
+      throwErrorsHttp(
+        'Only competition blog post are allow to join',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    const existingResult = await this.find(blogId, studentId);
+
+    if (existingResult) {
+      throwErrorsHttp(
+        'You have signed up for this competition, please refresh your browser for the updated post',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    const participants = new Participants();
+    participants.blogId = blogId;
+    participants.studentId = studentId;
+
+    const result = await this.participantsRepository.save(participants);
+    return pick(result, ['id', 'blogId', 'studentId']);
+  }
+}
+
+export default new ParticipantsService();

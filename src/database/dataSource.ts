@@ -9,6 +9,7 @@ import { Center } from './entity/Center.entity';
 import { Student } from './entity/Student.entity';
 import { UserSession } from './entity/UserSession.entity';
 import { Achievement } from './entity/Achievement.entity';
+import { Participants } from './entity/Participants.entity';
 import { StudentAchievements } from './entity/StudentAchievements.entity';
 
 dotenv.config();
@@ -31,6 +32,7 @@ const dbConnection = new DataSource({
     Student,
     Achievement,
     UserSession,
+    Participants,
     StudentAchievements
   ],
   options: { encrypt: false }

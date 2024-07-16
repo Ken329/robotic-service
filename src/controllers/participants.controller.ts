@@ -10,10 +10,12 @@ const find = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-// const findAll = async (req: Request, res: Response) =>
-//   BlogService.findAll(req.user)
-//     .then((data) => successApiResponse(res, 'Successfully get blogs', data))
-//     .catch((error) => errorApiResponse(res, error.message));
+const findAllById = async (req: Request, res: Response) =>
+  ParticipantService.findAllById(req.params.id)
+    .then((data) =>
+      successApiResponse(res, 'Successfully get all participants', data)
+    )
+    .catch((error) => errorApiResponse(res, error.message));
 
 const create = async (req: Request, res: Response) =>
   ParticipantService.create(req.params.id, get(req, 'user.studentId'))
@@ -22,9 +24,4 @@ const create = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-// const remove = async (req: Request, res: Response) =>
-//   BlogService.delete(req.params.id)
-//     .then((data) => successApiResponse(res, 'Successfully remove blog', data))
-//     .catch((error) => errorApiResponse(res, error.message));
-
-export default { find, create };
+export default { find, findAllById, create };

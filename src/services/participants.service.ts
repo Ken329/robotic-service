@@ -32,39 +32,57 @@ class ParticipantsService {
     return pick(result, ['id', 'blogId', 'studentId']);
   }
 
-  //   public async findAll(options?: {
-  //     role?: ROLE;
-  //     levelName?: string;
-  //   }): Promise<any[]> {
-  //     const result = await this.blogRepository.find();
+  public async findAllById(blogId: String): Promise<
+    {
+      title: string;
+      id: string;
+      studentId: string;
+      email: string;
+      levelName: string;
+      centerName: string;
+    }[]
+  > {
+    const result = await this.participantsRepository.find({
+      where: { blogId },
+      relations: ['blogId', 'studentId.level', 'studentId.user.center'],
+      select: {
+        blogId: {
+          title: true
+        },
+        studentId: {
+          id: true,
+          user: {
+            id: true,
+            email: true,
+            center: {
+              name: true
+            }
+          },
+          level: {
+            name: true
+          }
+        }
+      }
+    });
 
-  //     const mappedResult = map(result, (el) => {
-  //       if (
-  //         get(options, 'role', null) !== ROLE.STUDENT ||
-  //         el.assigned === 'All' ||
-  //         el.assigned.includes(
-  //           get(options, 'levelName', null).replaceAll(' ', '')
-  //         )
-  //       ) {
-  //         return {
-  //           ...pick(el, [
-  //             'id',
-  //             'title',
-  //             'category',
-  //             'type',
-  //             'description',
-  //             'assigned',
-  //             'views'
-  //           ]),
-  //           url: `${process.env.APP_URL}/api/file/${el.coverImage}`,
-  //           createdAt: el.createdAt
-  //         };
-  //       }
-  //       return null;
-  //     });
-
-  //     return compact(mappedResult);
-  //   }
+    return result.map(
+      (el: {
+        blogId: { title: string };
+        studentId: {
+          id: string;
+          level: { name: string };
+          user: { id: string; email: string; center: { name: string } };
+        };
+      }) => ({
+        title: el.blogId.title,
+        id: el.studentId.user.id,
+        studentId: el.studentId.id,
+        email: el.studentId.user.email,
+        levelName: el.studentId.level.name,
+        centerName: el.studentId.user.center.name
+      })
+    );
+  }
 
   public async create(
     blogId: string,
@@ -95,12 +113,6 @@ class ParticipantsService {
     const result = await this.participantsRepository.save(participants);
     return pick(result, ['id', 'blogId', 'studentId']);
   }
-
-  //   public async delete(id: string): Promise<boolean> {
-  //     await this.find(id);
-  //     await this.blogRepository.delete({ id });
-  //     return true;
-  //   }
 }
 
 export default new ParticipantsService();

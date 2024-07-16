@@ -279,6 +279,13 @@ route.get(
   blogController.find
 );
 
+route.get(
+  '/api/blog/:id/participants',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  participantsController.findAllById
+);
+
 route.post(
   '/api/blog',
   authenticate(AUTH_STRATEGY.ADMIN),
@@ -304,12 +311,6 @@ route.delete(
 /**
  * Participants Routes
  */
-// route.get(
-//   '/api/blog/category',
-//   authenticate(AUTH_STRATEGY.ADMIN),
-//   blogController.category
-// );
-
 route.get(
   '/api/participants/:id',
   authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
@@ -323,12 +324,5 @@ route.post(
   validate(Validators.paramsId),
   participantsController.create
 );
-
-// route.delete(
-//   '/api/blog/:id',
-//   authenticate(AUTH_STRATEGY.ADMIN),
-//   validate(Validators.paramsId),
-//   blogController.remove
-// );
 
 export default route;

@@ -4,6 +4,7 @@ import httpStatusCode from 'http-status-codes';
 import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest, ROLE } from '../utils/constant';
+import ParticipantService from '../services/participants.service';
 import { File } from '../database/entity/File.entity';
 import { User } from '../database/entity/User.entity';
 import { Blog } from '../database/entity/Blog.entity';
@@ -18,7 +19,7 @@ type FileResponse = {
   url?: string;
 };
 
-class LevelService {
+class FileService {
   private fileRepository: any;
   private userRepository: any;
   private blogRepository: any;
@@ -110,7 +111,7 @@ class LevelService {
     return true;
   }
 
-  public async generateExcel(): Promise<any> {
+  public async generateStudentsExcel(): Promise<any> {
     const workbook = new ExcelJs.Workbook();
     workbook.creator = 'Robotic SteamCup';
     workbook.created = new Date();
@@ -192,6 +193,52 @@ class LevelService {
     worksheet.addRows(mappedUsers);
     return workbook.xlsx.writeBuffer();
   }
+
+  public async generateCompetitionExcel(id: string): Promise<any> {
+    const workbook = new ExcelJs.Workbook();
+    workbook.creator = 'Robotic SteamCup';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    workbook.views = [
+      {
+        x: 0,
+        y: 0,
+        width: 10000,
+        height: 20000,
+        firstSheet: 0,
+        activeTab: 0,
+        visibility: 'visible'
+      }
+    ];
+
+    const participants = await ParticipantService.findAllById(id);
+    if (participants.length < 1)
+      throwErrorsHttp('Wrong blog id', httpStatusCode.BAD_REQUEST);
+
+    const worksheet = workbook.addWorksheet(participants[0].title);
+    worksheet.columns = [
+      { header: 'Id', key: 'id', width: 40 },
+      { header: 'Student ID', key: 'studentId', width: 40 },
+      { header: 'Email', key: 'email', width: 32 },
+      { header: 'Contact', key: 'contact', width: 32 },
+      { header: 'Level', key: 'level', width: 20 },
+      { header: 'Center', key: 'center', width: 20 },
+      { header: 'Join Date', key: 'createdAt', width: 20 }
+    ];
+
+    const mappedUsers = map(participants, (participant) => ({
+      id: participant.id,
+      studentId: participant.studentId,
+      email: participant.email,
+      contact: participant.contact,
+      level: participant.levelName,
+      center: participant.centerName,
+      createdAt: participant.createdAt
+    }));
+
+    worksheet.addRows(mappedUsers);
+    return workbook.xlsx.writeBuffer();
+  }
 }
 
-export default new LevelService();
+export default new FileService();

@@ -25,7 +25,7 @@ const generateToken = (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const verifyOtp = async (req: Request, res: Response) =>
-  AuthService.verifyOtp(req.body.id, req.body.code)
+  AuthService.verifyOtp(req.body)
     .then(() => successApiResponse(res, 'Successfully verify otp'))
     .catch((error) => errorApiResponse(res, error.message));
 

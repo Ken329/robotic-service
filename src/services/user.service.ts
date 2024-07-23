@@ -83,16 +83,17 @@ class UserService {
 
   public async user(
     id: string,
-    option?: { status?: USER_STATUS; centerId?: string }
+    option?: { status?: USER_STATUS; centerId?: string; email?: string }
   ): Promise<UserResponse> {
-    const query = pick(option, ['status', 'centerId']);
+    const query = pick(option, ['status', 'centerId', 'email']);
+    if (id) set(query, 'id', id);
     if (query.centerId) {
       set(query, 'center', query.centerId);
       delete query.centerId;
     }
 
     const user = await this.userRepository.findOne({
-      where: { id, ...query },
+      where: query,
       relations: ['center', 'student']
     });
 
@@ -139,7 +140,10 @@ class UserService {
     }
 
     if (moment().isAfter(get(studentDetails, 'expiryDate', null))) {
-      await this.userRepository.update({ id }, { status: USER_STATUS.EXPIRED });
+      await this.userRepository.update(
+        { id: user.id },
+        { status: USER_STATUS.EXPIRED }
+      );
       user.status = USER_STATUS.EXPIRED;
     }
 

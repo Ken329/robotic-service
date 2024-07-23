@@ -223,7 +223,13 @@ route.get(
 route.get(
   '/api/file/excel',
   authenticate(AUTH_STRATEGY.ADMIN),
-  fileController.generateExcel
+  fileController.generateStudentExcel
+);
+
+route.get(
+  '/api/file/excel/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  fileController.generateCompetitionExcel
 );
 
 route.get('/api/file/:id', validate(Validators.paramsId), fileController.find);

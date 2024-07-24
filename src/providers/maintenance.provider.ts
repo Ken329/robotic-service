@@ -13,11 +13,11 @@ export const isMaintenance = () => {
   const endDate = moment()
     .add(1, 'd')
     .set({ hour: endTime, minute: 0, second: 0 });
-  const maintenanceCheck = moment().isBetween(startDate, endDate);
+  // const maintenanceCheck = moment().isBetween(startDate, endDate);
   console.log(
     `Maintenance from ${startDate.format('DD MMM YYYY hh:MM:ss A')} to ${endDate.format('DD MMM YYYY hh:MM:ss A')}`
   );
-  return maintenanceCheck;
+  return false;
 };
 
 const maintenanceChecker = (

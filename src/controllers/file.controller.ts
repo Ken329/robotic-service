@@ -28,8 +28,8 @@ const remove = async (req: Request, res: Response) =>
     .then((data) => successApiResponse(res, 'Successfully remove file', data))
     .catch((error) => errorApiResponse(res, error.message));
 
-const generateExcel = async (req: Request, res: Response) =>
-  FileService.generateExcel()
+const generateStudentExcel = async (req: Request, res: Response) =>
+  FileService.generateStudentsExcel()
     .then((data) => {
       res.type('application/vnd.ms-excel');
       res.set('Content-Disposition', 'attachment; filename=students.xlsx');
@@ -37,4 +37,20 @@ const generateExcel = async (req: Request, res: Response) =>
     })
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { find, findAll, create, remove, generateExcel };
+const generateCompetitionExcel = async (req: Request, res: Response) =>
+  FileService.generateCompetitionExcel(req.params.id)
+    .then((data) => {
+      res.type('application/vnd.ms-excel');
+      res.set('Content-Disposition', 'attachment; filename=students.xlsx');
+      res.send(data);
+    })
+    .catch((error) => errorApiResponse(res, error.message));
+
+export default {
+  find,
+  findAll,
+  create,
+  remove,
+  generateStudentExcel,
+  generateCompetitionExcel
+};

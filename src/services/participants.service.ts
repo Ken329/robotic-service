@@ -38,8 +38,10 @@ class ParticipantsService {
       id: string;
       studentId: string;
       email: string;
+      contact: string;
       levelName: string;
       centerName: string;
+      createdAt: string;
     }[]
   > {
     const result = await this.participantsRepository.find({
@@ -51,6 +53,7 @@ class ParticipantsService {
         },
         studentId: {
           id: true,
+          contact: true,
           user: {
             id: true,
             email: true,
@@ -61,7 +64,8 @@ class ParticipantsService {
           level: {
             name: true
           }
-        }
+        },
+        createdAt: true
       }
     });
 
@@ -70,16 +74,20 @@ class ParticipantsService {
         blogId: { title: string };
         studentId: {
           id: string;
+          contact: string;
           level: { name: string };
           user: { id: string; email: string; center: { name: string } };
         };
+        createdAt: string;
       }) => ({
         title: el.blogId.title,
         id: el.studentId.user.id,
         studentId: el.studentId.id,
+        contact: el.studentId.contact,
         email: el.studentId.user.email,
         levelName: el.studentId.level.name,
-        centerName: el.studentId.user.center.name
+        centerName: el.studentId.user.center.name,
+        createdAt: el.createdAt
       })
     );
   }

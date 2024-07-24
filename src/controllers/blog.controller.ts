@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { BLOG_CATEGORY, BLOG_TYPE } from '../utils/constant';
 import BlogService from '../services/blog.service';
+import { BLOG_CATEGORY, BLOG_TYPE } from '../utils/constant';
 import { successApiResponse, errorApiResponse } from '../utils/helpers';
 
 const type = async (req: Request, res: Response) =>

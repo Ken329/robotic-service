@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { isEmpty } from 'lodash';
+import httpStatus from 'http-status-codes';
 import passportCustom from 'passport-custom';
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/auth.service';
@@ -21,7 +22,7 @@ export const authenticate =
   (req: Request, res: Response, next: NextFunction) =>
     passport.authenticate(guard, (error: any, user: string) => {
       if (error || !user) {
-        return res.status(401).json({
+        return res.status(httpStatus.UNAUTHORIZED).json({
           success: false,
           message: 'Unauthorized'
         });

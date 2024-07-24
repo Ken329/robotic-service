@@ -147,10 +147,16 @@ class AuthService {
     }
   }
 
-  public async verifyOtp(id: string, code: string): Promise<boolean> {
-    const user = await UserService.user(id);
+  public async verifyOtp(payload: {
+    code: string;
+    id?: string;
+    email?: string;
+  }): Promise<boolean> {
+    const user = get(payload, 'id', null)
+      ? await UserService.user(payload.id)
+      : await UserService.userWithEmail(get(payload, 'email', null));
 
-    await AwsCognitoService.confirmedSignUp(user.email, code);
+    await AwsCognitoService.confirmedSignUp(user.email, payload.code);
     await UserService.update(
       user.id,
       user.role === ROLE.STUDENT

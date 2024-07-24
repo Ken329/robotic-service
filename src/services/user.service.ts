@@ -83,17 +83,76 @@ class UserService {
 
   public async user(
     id: string,
-    option?: { status?: USER_STATUS; centerId?: string; email?: string }
+    option?: { status?: USER_STATUS; centerId?: string }
   ): Promise<UserResponse> {
-    const query = pick(option, ['status', 'centerId', 'email']);
-    if (id) set(query, 'id', id);
+    const query = pick(option, ['status', 'centerId']);
     if (query.centerId) {
       set(query, 'center', query.centerId);
       delete query.centerId;
     }
 
     const user = await this.userRepository.findOne({
-      where: query,
+      where: { id, ...query },
+      relations: ['center', 'student']
+    });
+
+    if (!user) throwErrorsHttp('User not found', httpStatusCode.NOT_FOUND);
+
+    const centerDetails = user.center
+      ? {
+          centerId: get(user.center, 'id'),
+          centerName: get(user.center, 'name'),
+          centerLocation: get(user.center, 'location')
+        }
+      : {};
+
+    const studentDetails = user.student
+      ? {
+          studentId: user.student.id,
+          roboticId: user.student.roboticId,
+          fullName: user.student.fullName,
+          level: user.student.level,
+          size: user.student.size,
+          gender: user.student.gender,
+          dob: user.student.dob,
+          nric: user.student.nric,
+          passport: user.student.passport,
+          personalEmail: user.student.personalEmail,
+          contact: user.student.contact,
+          moeEmail: user.student.moeEmail,
+          race: user.student.race,
+          school: user.student.school,
+          nationality: user.student.nationality,
+          parentName: user.student.parentName,
+          relationship: user.student.relationship,
+          parentEmail: user.student.parentEmail,
+          parentContact: user.student.parentContact,
+          parentConsent: binaryToBool(user.student.parentConsent),
+          expiryDate: user.student.expiryDate,
+          rejectedBy: user.student.rejectedBy
+        }
+      : {};
+
+    if (studentDetails.level) {
+      const levelDetails = await LevelService.level(studentDetails.level);
+      set(studentDetails, 'levelName', levelDetails.name);
+    }
+
+    if (moment().isAfter(get(studentDetails, 'expiryDate', null))) {
+      await this.userRepository.update({ id }, { status: USER_STATUS.EXPIRED });
+      user.status = USER_STATUS.EXPIRED;
+    }
+
+    return {
+      ...pick(user, ['id', 'email', 'role', 'status']),
+      ...centerDetails,
+      ...studentDetails
+    };
+  }
+
+  public async userWithEmail(email: string): Promise<UserResponse> {
+    const user = await this.userRepository.findOne({
+      where: { email },
       relations: ['center', 'student']
     });
 

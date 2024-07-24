@@ -152,10 +152,9 @@ class AuthService {
     id?: string;
     email?: string;
   }): Promise<boolean> {
-    const user = await UserService.user(
-      get(payload, 'id', null),
-      pick(payload, ['email'])
-    );
+    const user = get(payload, 'id', null)
+      ? await UserService.user(payload.id)
+      : await UserService.userWithEmail(get(payload, 'email', null));
 
     await AwsCognitoService.confirmedSignUp(user.email, payload.code);
     await UserService.update(

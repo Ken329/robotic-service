@@ -340,7 +340,7 @@ class UserService {
 
       return this.user(result.id);
     } catch (error) {
-      CenterService.delete(centerId);
+      if (role === ROLE.CENTER) CenterService.delete(centerId);
       throw new Error(error.message);
     }
   }

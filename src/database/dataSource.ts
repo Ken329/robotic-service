@@ -11,7 +11,6 @@ import { UserSession } from './entity/UserSession.entity';
 import { Achievement } from './entity/Achievement.entity';
 import { Participants } from './entity/Participants.entity';
 import { StudentAchievements } from './entity/StudentAchievements.entity';
-import { isMaintenance } from '../providers/maintenance.provider';
 
 dotenv.config();
 
@@ -39,16 +38,14 @@ const dbConnection = new DataSource({
   options: { encrypt: false }
 });
 
-if (!isMaintenance()) {
-  dbConnection
-    .initialize()
-    .then(() => {
-      console.log(`Data Source has been initialized`);
-    })
-    .catch((error) => {
-      console.error(`Data Source initialization error: ${error.message}`);
-      process.exit(1);
-    });
-}
+dbConnection
+  .initialize()
+  .then(() => {
+    console.log(`Data Source has been initialized`);
+  })
+  .catch((error) => {
+    console.error(`Data Source initialization error: ${error.message}`);
+    process.exit(1);
+  });
 
 export default dbConnection;

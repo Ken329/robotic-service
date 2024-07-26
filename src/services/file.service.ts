@@ -1,14 +1,16 @@
 import { get, pick, map } from 'lodash';
 import ExcelJs from 'exceljs';
 import httpStatusCode from 'http-status-codes';
-import DataSource from '../database/dataSource';
+import {
+  FileRepository,
+  UserRepository,
+  BlogRepository,
+  AchievementRepository
+} from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest, ROLE } from '../utils/constant';
 import ParticipantService from '../services/participants.service';
 import { File } from '../database/entity/File.entity';
-import { User } from '../database/entity/User.entity';
-import { Blog } from '../database/entity/Blog.entity';
-import { Achievement } from '../database/entity/Achievement.entity';
 
 type FileResponse = {
   id?: string;
@@ -26,10 +28,10 @@ class FileService {
   private achievementRepository: any;
 
   constructor() {
-    this.fileRepository = DataSource.getRepository(File);
-    this.userRepository = DataSource.getRepository(User);
-    this.blogRepository = DataSource.getRepository(Blog);
-    this.achievementRepository = DataSource.getRepository(Achievement);
+    this.fileRepository = FileRepository;
+    this.userRepository = UserRepository;
+    this.blogRepository = BlogRepository;
+    this.achievementRepository = AchievementRepository;
   }
 
   public async find(

@@ -1,10 +1,10 @@
 import { pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import BlogService from './blog.service';
-import DataSource from '../database/dataSource';
-import { throwErrorsHttp } from '../utils/helpers';
-import { Participants } from '../database/entity/Participants.entity';
 import { BLOG_CATEGORY } from '../utils/constant';
+import { throwErrorsHttp } from '../utils/helpers';
+import { ParticipantsRepository } from '../database/dataSource';
+import { Participants } from '../database/entity/Participants.entity';
 
 type ParticipantsResponse = {
   id: string;
@@ -16,7 +16,7 @@ class ParticipantsService {
   private participantsRepository: any;
 
   constructor() {
-    this.participantsRepository = DataSource.getRepository(Participants);
+    this.participantsRepository = ParticipantsRepository;
   }
 
   public async find(

@@ -4,10 +4,10 @@ import { get, pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import httpStatusCode from 'http-status-codes';
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
-import UserService, { UserResponse } from './user.service';
 import AwsCognitoService from './awsCognito.service';
-import DataSource from '../database/dataSource';
+import UserService, { UserResponse } from './user.service';
 import { ROLE, USER_STATUS } from '../utils/constant';
+import { UserSessionRepository } from '../database/dataSource';
 import { throwErrorsHttp, encryption, decryption } from '../utils/helpers';
 import { UserSession } from '../database/entity/UserSession.entity';
 
@@ -17,7 +17,7 @@ class AuthService {
   private audience = 'Robotic Club Portal';
 
   constructor() {
-    this.userSessionRepository = DataSource.getRepository(UserSession);
+    this.userSessionRepository = UserSessionRepository;
     this.verifier = CognitoJwtVerifier.create({
       tokenUse: 'access',
       userPoolId: process.env.COGNITO_POOL_ID,

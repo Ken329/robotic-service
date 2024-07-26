@@ -1,9 +1,8 @@
 import { get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
-import DataSource from '../database/dataSource';
+import { UserRepository, CenterRepository } from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { ROLE, USER_STATUS } from '../utils/constant';
-import { User } from '../database/entity/User.entity';
 import { Center } from '../database/entity/Center.entity';
 
 type CenterResponse = {
@@ -17,8 +16,8 @@ class UserService {
   private centerRepository: any;
 
   constructor() {
-    this.userRepository = DataSource.getRepository(User);
-    this.centerRepository = DataSource.getRepository(Center);
+    this.userRepository = UserRepository;
+    this.centerRepository = CenterRepository;
   }
 
   public async center(id?: string): Promise<CenterResponse> {

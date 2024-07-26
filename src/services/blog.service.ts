@@ -1,7 +1,7 @@
 import { get, set, pick, map, compact } from 'lodash';
 import httpStatusCode from 'http-status-codes';
-import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
+import { BlogRepository } from '../database/dataSource';
 import { BLOG_TYPE, BLOG_CATEGORY, ROLE } from '../utils/constant';
 import { Blog } from '../database/entity/Blog.entity';
 
@@ -22,7 +22,7 @@ class BlogService {
   private blogRepository: any;
 
   constructor() {
-    this.blogRepository = DataSource.getRepository(Blog);
+    this.blogRepository = BlogRepository;
   }
 
   public async find(

@@ -38,14 +38,16 @@ const dbConnection = new DataSource({
   options: { encrypt: false }
 });
 
-dbConnection
-  .initialize()
-  .then(() => {
-    console.log(`Data Source has been initialized`);
-  })
-  .catch((error) => {
-    console.error(`Data Source initialization error: ${error.message}`);
-    process.exit(1);
-  });
+export const UserRepository = dbConnection.getRepository(User);
+export const FileRepository = dbConnection.getRepository(File);
+export const BlogRepository = dbConnection.getRepository(Blog);
+export const LevelRepository = dbConnection.getRepository(Level);
+export const CenterRepository = dbConnection.getRepository(Center);
+export const StudentRepository = dbConnection.getRepository(Student);
+export const AchievementRepository = dbConnection.getRepository(Achievement);
+export const UserSessionRepository = dbConnection.getRepository(UserSession);
+export const ParticipantsRepository = dbConnection.getRepository(Participants);
+export const StudentAchievementsRepository =
+  dbConnection.getRepository(StudentAchievements);
 
 export default dbConnection;

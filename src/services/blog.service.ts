@@ -76,18 +76,22 @@ class BlogService {
     return filteredResult;
   }
 
-  public async findAll(options?: {
-    role?: ROLE;
-    levelName?: string;
-  }): Promise<any[]> {
-    const result = await this.blogRepository.find();
+  public async findAll(
+    userDetails: {
+      role?: ROLE;
+      levelName?: string;
+    },
+    query?: { category?: BLOG_CATEGORY }
+  ): Promise<any[]> {
+    const where = pick(query, ['category']);
+    const result = await this.blogRepository.find({ where });
 
     const mappedResult = map(result, (el) => {
       if (
-        get(options, 'role', null) !== ROLE.STUDENT ||
+        get(userDetails, 'role', null) !== ROLE.STUDENT ||
         el.assigned === 'All' ||
         el.assigned.includes(
-          get(options, 'levelName', null).replaceAll(' ', '')
+          get(userDetails, 'levelName', null).replaceAll(' ', '')
         )
       ) {
         return {

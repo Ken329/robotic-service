@@ -318,6 +318,12 @@ route.delete(
  * Participants Routes
  */
 route.get(
+  '/api/participants',
+  authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
+  participantsController.findAll
+);
+
+route.get(
   '/api/participants/:id',
   authenticate(AUTH_STRATEGY.APPROVED_STUDENT),
   validate(Validators.paramsId),

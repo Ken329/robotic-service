@@ -22,7 +22,7 @@ const find = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const findAll = async (req: Request, res: Response) =>
-  BlogService.findAll(req.user)
+  BlogService.findAll(req.user, req.query)
     .then((data) => successApiResponse(res, 'Successfully get blogs', data))
     .catch((error) => errorApiResponse(res, error.message));
 

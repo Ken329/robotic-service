@@ -13,8 +13,8 @@ import {
   USER_STATUS,
   RELATIONSHIP
 } from '../utils/constant';
-import DataSource from '../database/dataSource';
 import { binaryToBool, throwErrorsHttp } from '../utils/helpers';
+import { UserRepository, StudentRepository } from '../database/dataSource';
 import { User } from '../database/entity/User.entity';
 import { Student } from '../database/entity/Student.entity';
 
@@ -77,8 +77,8 @@ class UserService {
   private studentRepository: any;
 
   constructor() {
-    this.userRepository = DataSource.getRepository(User);
-    this.studentRepository = DataSource.getRepository(Student);
+    this.userRepository = UserRepository;
+    this.studentRepository = StudentRepository;
   }
 
   public async user(

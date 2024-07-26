@@ -2,12 +2,14 @@ import { In, Not } from 'typeorm';
 import { find, get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import FileService from './file.service';
-import DataSource from '../database/dataSource';
+import {
+  StudentRepository,
+  AchievementRepository,
+  StudentAchievementsRepository
+} from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest } from '../utils/constant';
-import { Student } from '../database/entity/Student.entity';
 import { Achievement } from '../database/entity/Achievement.entity';
-import { StudentAchievements } from '../database/entity/StudentAchievements.entity';
 
 type AchievementResponse = {
   id: string;
@@ -31,10 +33,9 @@ class LevelService {
   private studentAchievementsRepository: any;
 
   constructor() {
-    this.studentRepository = DataSource.getRepository(Student);
-    this.achievementRepository = DataSource.getRepository(Achievement);
-    this.studentAchievementsRepository =
-      DataSource.getRepository(StudentAchievements);
+    this.studentRepository = StudentRepository;
+    this.achievementRepository = AchievementRepository;
+    this.studentAchievementsRepository = StudentAchievementsRepository;
   }
 
   public async achievement(id: string): Promise<AchievementResponse> {

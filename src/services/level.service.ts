@@ -1,9 +1,8 @@
 import { get, map, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
-import DataSource from '../database/dataSource';
 import { throwErrorsHttp } from '../utils/helpers';
+import { LevelRepository, StudentRepository } from '../database/dataSource';
 import { Level } from '../database/entity/Level.entity';
-import { Student } from '../database/entity/Student.entity';
 
 type LevelResponse = {
   id: string;
@@ -15,8 +14,8 @@ class LevelService {
   private studentRepository: any;
 
   constructor() {
-    this.levelRepository = DataSource.getRepository(Level);
-    this.studentRepository = DataSource.getRepository(Student);
+    this.levelRepository = LevelRepository;
+    this.studentRepository = StudentRepository;
   }
 
   public async level(id?: string): Promise<LevelResponse> {

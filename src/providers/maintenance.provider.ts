@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import moment from 'moment';
 import { find, get } from 'lodash';
 import httpStatus from 'http-status-codes';
 import { Request, Response, NextFunction } from 'express';
@@ -6,7 +7,7 @@ import { Request, Response, NextFunction } from 'express';
 dotenv.config();
 
 export const isMaintenance = () => {
-  const currentTime = new Date().getHours();
+  const currentTime = moment().utcOffset('+0800').hour();
   const timeRange = process.env.MAINTENANCE_TIME_RANGE.trim().split(',');
   return !!find(timeRange, (el) => el === currentTime.toString());
 };

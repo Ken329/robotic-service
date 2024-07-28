@@ -10,6 +10,17 @@ const find = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
+const findAll = async (req: Request, res: Response) =>
+  ParticipantService.findAll(get(req, 'user.studentId'))
+    .then((data) =>
+      successApiResponse(
+        res,
+        'Successfully get participanted competition',
+        data
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 const findAllById = async (req: Request, res: Response) =>
   ParticipantService.findAllById(req.params.id)
     .then((data) =>
@@ -24,4 +35,4 @@ const create = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { find, findAllById, create };
+export default { find, findAll, findAllById, create };

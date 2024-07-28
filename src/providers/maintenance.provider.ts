@@ -12,12 +12,12 @@ export const isMaintenance = () => {
   return !!find(timeRange, (el) => el === currentTime.toString());
 };
 
-const maintenanceStartTime = () => {
+export const maintenanceStartTime = () => {
   const timeRange = process.env.MAINTENANCE_TIME_RANGE.trim().split(',');
   return get(timeRange, 0);
 };
 
-const maintenanceEndTime = () => {
+export const maintenanceEndTime = () => {
   const timeRange = process.env.MAINTENANCE_TIME_RANGE.trim().split(',');
   return get(timeRange, timeRange.length - 1);
 };
@@ -26,7 +26,10 @@ const maintenanceChecker = (_: Request, res: Response, next: NextFunction) => {
   isMaintenance()
     ? res.status(httpStatus.SERVICE_UNAVAILABLE).json({
         success: false,
-        message: `Robotic Service is having a downline from ${maintenanceStartTime()}:00 PM to ${maintenanceEndTime()}:00 AM everyday`
+        data: {
+          startTime: `${maintenanceStartTime()}:00 PM`,
+          endTime: `${maintenanceEndTime()}:00 AM`
+        }
       })
     : next();
 };

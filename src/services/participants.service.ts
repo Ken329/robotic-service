@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import BlogService from './blog.service';
-import { BLOG_CATEGORY } from '../utils/constant';
+import { BLOG_CATEGORY, BLOG_TYPE } from '../utils/constant';
 import { throwErrorsHttp } from '../utils/helpers';
 import { ParticipantsRepository } from '../database/dataSource';
 import { Participants } from '../database/entity/Participants.entity';
@@ -30,6 +30,39 @@ class ParticipantsService {
     if (!result) return null;
 
     return pick(result, ['id', 'blogId', 'studentId']);
+  }
+
+  public async findAll(studentId: string): Promise<
+    {
+      id: string;
+      title: string;
+      category: BLOG_CATEGORY;
+      type: BLOG_TYPE;
+      description: string;
+      assigned: string;
+      views: string;
+      url: string;
+      createdAt: string;
+    }[]
+  > {
+    const result = await this.participantsRepository.find({
+      where: { studentId },
+      relations: ['blogId']
+    });
+
+    return result.map(({ blogId: el }) => ({
+      ...pick(el, [
+        'id',
+        'title',
+        'category',
+        'type',
+        'description',
+        'assigned',
+        'views'
+      ]),
+      url: `${process.env.APP_URL}/api/file/${el.coverImage}`,
+      createdAt: el.createdAt
+    }));
   }
 
   public async findAllById(blogId: String): Promise<

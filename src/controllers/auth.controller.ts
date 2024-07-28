@@ -6,7 +6,7 @@ import {
 } from '../utils/helpers';
 import AuthService from '../services/auth.service';
 
-const generatePublicKey = (req: Request, res: Response) => {
+const generatePublicKey = (_: Request, res: Response) => {
   try {
     const publicKey = getPublicKey();
     return successApiResponse(res, 'Successfully generate public key', {

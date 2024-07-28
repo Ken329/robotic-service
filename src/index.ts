@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import Express, { Application } from 'express';
 import routes from './api.route';
 import internalRoutes from './apiInternal.route';
+import maintenanceRoutes from './apiMaintenance.route';
 import authProvider from './providers/auth.provider';
 import maintenanceChecker from './providers/maintenance.provider';
 import databaseConnectionChecker from './providers/databaseConnectionProvider';
@@ -14,6 +15,7 @@ const app: Application = Express();
 const port: string = process.env.PORT || '8080';
 
 app.use(bodyParser.json());
+app.use(maintenanceRoutes);
 app.use(maintenanceChecker);
 app.use(databaseConnectionChecker);
 app.use(authProvider.registerPassportPolicies());

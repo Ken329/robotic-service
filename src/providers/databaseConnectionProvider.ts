@@ -13,7 +13,7 @@ const connectionChecker = async (
   } catch (error) {
     res.status(httpStatus.EXPECTATION_FAILED).json({
       success: false,
-      message: `Something went wrong, please try again later or contact SteamCup support for help`
+      message: `Something went wrong, please try again later or contact SteamCup support for help !!!`
     });
   }
 };

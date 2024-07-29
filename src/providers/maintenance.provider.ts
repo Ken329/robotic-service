@@ -14,12 +14,12 @@ export const isMaintenance = () => {
 
 export const maintenanceStartTime = () => {
   const timeRange = process.env.MAINTENANCE_TIME_RANGE.trim().split(',');
-  return get(timeRange, 0);
+  return `${get(timeRange, 0)}:00 AM`;
 };
 
 export const maintenanceEndTime = () => {
   const timeRange = process.env.MAINTENANCE_TIME_RANGE.trim().split(',');
-  return get(timeRange, timeRange.length - 1);
+  return `${get(timeRange, timeRange.length - 1)}:00 AM`;
 };
 
 const maintenanceChecker = (_: Request, res: Response, next: NextFunction) => {
@@ -27,8 +27,8 @@ const maintenanceChecker = (_: Request, res: Response, next: NextFunction) => {
     ? res.status(httpStatus.SERVICE_UNAVAILABLE).json({
         success: false,
         data: {
-          startTime: `${maintenanceStartTime()}:00 PM`,
-          endTime: `${maintenanceEndTime()}:00 AM`
+          startTime: maintenanceStartTime(),
+          endTime: maintenanceEndTime()
         }
       })
     : next();

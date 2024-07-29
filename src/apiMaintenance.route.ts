@@ -13,8 +13,8 @@ route.get('/api/maintenance', (_: Request, res: Response) => {
     success: true,
     data: isMaintenance()
       ? {
-          startTime: `${maintenanceStartTime()}:00 PM`,
-          endTime: `${maintenanceEndTime()}:00 AM`
+          startTime: maintenanceStartTime(),
+          endTime: maintenanceEndTime()
         }
       : null
   });

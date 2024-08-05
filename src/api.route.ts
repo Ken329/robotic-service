@@ -134,6 +134,14 @@ route.post(
  */
 route.get('/api/center', centerController.centers);
 
+route.put(
+  '/api/center/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  validate(Validators.centerValidators.centerUpdate),
+  centerController.update
+);
+
 /**
  * Level Routes
  */

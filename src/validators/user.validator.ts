@@ -230,6 +230,11 @@ const studentUpdate = z.object({
       .string({ required_error: 'Robotic ID is required' })
       .min(1, { message: 'Robotic ID should not be empty' })
       .optional()
+      .or(emptyStringToNull),
+    joinedDate: z
+      .string({ required_error: 'Joined date is required' })
+      .regex(DOB_REGEX, 'Invalid joined date format eg: 12/12/2000')
+      .optional()
       .or(emptyStringToNull)
   })
 });

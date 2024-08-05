@@ -6,6 +6,7 @@ import blogValidator from './blog.validator';
 import authValidators from './auth.validator';
 import userValidators from './user.validator';
 import levelValidators from './level.validator';
+import centerValidators from './center.validator';
 import achievementValidators from './achievement.validator';
 import { errorApiResponse } from '../utils/helpers';
 
@@ -78,5 +79,6 @@ export default {
   authValidators,
   userValidators,
   levelValidators,
+  centerValidators,
   achievementValidators
 };

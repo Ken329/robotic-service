@@ -45,6 +45,21 @@ class UserService {
     return this.centerRepository.save(center);
   }
 
+  public async update(
+    id: string,
+    payload: {
+      name?: string;
+      location?: string;
+    }
+  ): Promise<CenterResponse> {
+    await this.centerRepository.update(
+      { id },
+      pick(payload, ['name', 'location'])
+    );
+
+    return this.center(id);
+  }
+
   public async delete(id: string): Promise<boolean> {
     const users = await this.userRepository.findAndCount({
       where: { center: id, role: ROLE.STUDENT }

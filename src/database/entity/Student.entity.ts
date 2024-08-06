@@ -31,6 +31,9 @@ export class Student {
   level: string;
 
   @Column({ nullable: true })
+  joinedDate: string;
+
+  @Column({ nullable: true })
   nric: string;
 
   @Column({ nullable: true })

@@ -45,6 +45,7 @@ export type UserResponse = {
   parentEmail?: string;
   parentContact?: string;
   expiryDate?: Date;
+  joinedDate?: string;
   rejectedBy?: string;
 };
 
@@ -70,6 +71,7 @@ type StudentInfo = {
   parentContact?: string;
   parentConsent?: boolean;
   expiryDate?: Date;
+  joinedDate?: string;
 };
 
 class UserService {
@@ -129,6 +131,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
       : {};
@@ -189,6 +192,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
       : {};
@@ -378,7 +382,8 @@ class UserService {
       'parentEmail',
       'parentContact',
       'parentConsent',
-      'expiryDate'
+      'expiryDate',
+      'joinedDate'
     ]);
 
     if (filterPayload.level) {
@@ -446,10 +451,17 @@ class UserService {
   ): Promise<UserResponse> {
     if (
       userInfo.role === ROLE.CENTER &&
-      (!get(payload, 'level', null) || !get(payload, 'roboticId', null))
+      (!get(payload, 'level', null) || !get(payload, 'joinedDate', null))
     ) {
       throwErrorsHttp(
-        'Level & Robotic ID is required upon approval',
+        'Level & Joined Date is required upon approval for center',
+        httpStatusCode.BAD_REQUEST
+      );
+    }
+
+    if (userInfo.role === ROLE.ADMIN && !get(payload, 'roboticId', null)) {
+      throwErrorsHttp(
+        'Robotic ID is required upon approval for admin',
         httpStatusCode.BAD_REQUEST
       );
     }

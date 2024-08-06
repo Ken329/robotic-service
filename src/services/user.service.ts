@@ -45,12 +45,12 @@ export type UserResponse = {
   parentEmail?: string;
   parentContact?: string;
   expiryDate?: Date;
+  joinedDate?: string;
   rejectedBy?: string;
 };
 
 type StudentInfo = {
   roboticId?: string;
-  joinedDate?: string;
   level?: string;
   center?: string;
   nric?: string;
@@ -71,6 +71,7 @@ type StudentInfo = {
   parentContact?: string;
   parentConsent?: boolean;
   expiryDate?: Date;
+  joinedDate?: string;
 };
 
 class UserService {
@@ -130,6 +131,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
       : {};
@@ -190,6 +192,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
       : {};

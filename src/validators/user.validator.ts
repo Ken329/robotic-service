@@ -5,6 +5,7 @@ import {
   NRIC_REGEX,
   TSHIRT_SIZE,
   USER_STATUS,
+  EMAIL_REGEX,
   RELATIONSHIP,
   CONTACT_REGEX
 } from '../utils/constant';
@@ -33,7 +34,7 @@ const studentCreation = z.object({
   body: z.object({
     email: z
       .string({ required_error: 'Email is required' })
-      .email('Email is not valid'),
+      .regex(EMAIL_REGEX, 'Email is not valid'),
     password: z.string({ required_error: 'Password is required' }),
     fullName: z.string({ required_error: 'Full name is required' }),
     gender: z.enum([GENDER.MALE, GENDER.FEMALE, GENDER.OTHERS], {
@@ -66,7 +67,7 @@ const studentCreation = z.object({
       .or(emptyStringToNull),
     personalEmail: z
       .string({ required_error: 'Personal email is required' })
-      .email('Personal email is not valid')
+      .regex(EMAIL_REGEX, 'Personal email is not valid')
       .optional()
       .or(emptyStringToNull),
     contact: z
@@ -79,7 +80,7 @@ const studentCreation = z.object({
       .min(1, { message: 'Race should not be empty' }),
     moeEmail: z
       .string({ required_error: 'Moe Email is required' })
-      .email('Moe Email is not valid')
+      .regex(EMAIL_REGEX, 'Moe Email is not valid')
       .optional()
       .or(emptyStringToNull),
     school: z
@@ -97,7 +98,7 @@ const studentCreation = z.object({
     ),
     parentEmail: z
       .string({ required_error: 'Parent Email is required' })
-      .email('Parent Email is not valid'),
+      .regex(EMAIL_REGEX, 'Parent Email is not valid'),
     parentContact: z
       .string({ required_error: 'Parent contact is required' })
       .regex(CONTACT_REGEX, 'Invalid contact number format eg: +60123456789'),
@@ -112,7 +113,7 @@ const adminCreation = z.object({
   body: z.object({
     email: z
       .string({ required_error: 'Email is required' })
-      .email('Email is not valid'),
+      .regex(EMAIL_REGEX, 'Email is not valid'),
     password: z
       .string({ required_error: 'Password is required' })
       .min(1, { message: 'Password should not be empty' })
@@ -123,7 +124,7 @@ const centerCreation = z.object({
   body: z.object({
     email: z
       .string({ required_error: 'Email is required' })
-      .email('Email is not valid'),
+      .regex(EMAIL_REGEX, 'Email is not valid'),
     password: z
       .string({ required_error: 'Password is required' })
       .min(1, { message: 'Password should not be empty' }),
@@ -172,7 +173,7 @@ const studentUpdate = z.object({
       .or(emptyStringToNull),
     personalEmail: z
       .string({ required_error: 'Personal email is required' })
-      .email('Personal email is not valid')
+      .regex(EMAIL_REGEX, 'Personal email is not valid')
       .optional()
       .or(emptyStringToNull),
     contact: z
@@ -187,7 +188,7 @@ const studentUpdate = z.object({
       .or(emptyStringToNull),
     moeEmail: z
       .string({ required_error: 'Moe Email is required' })
-      .email('Moe Email is not valid')
+      .regex(EMAIL_REGEX, 'Moe Email is not valid')
       .optional()
       .or(emptyStringToNull),
     school: z
@@ -213,7 +214,7 @@ const studentUpdate = z.object({
       .or(emptyStringToNull),
     parentEmail: z
       .string({ required_error: 'Parent Email is required' })
-      .email('Parent Email is not valid')
+      .regex(EMAIL_REGEX, 'Parent Email is not valid')
       .optional()
       .or(emptyStringToNull),
     parentContact: z

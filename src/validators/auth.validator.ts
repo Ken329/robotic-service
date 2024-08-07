@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EMAIL_REGEX } from '../utils/constant';
 
 const generateToken = z.object({
   body: z.object({
@@ -14,7 +15,7 @@ const verifyOtp = z.object({
       .optional(),
     email: z
       .string({ required_error: 'Email is required' })
-      .email('Email is not valid')
+      .regex(EMAIL_REGEX, 'Email is not valid')
       .optional(),
     code: z
       .string({ required_error: 'Code is required' })

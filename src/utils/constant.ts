@@ -59,7 +59,7 @@ export enum BLOG_TYPE {
 }
 
 export const CONTACT_REGEX = new RegExp(
-  /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[1]-*[0-9]{8}$/
+  /^(\+?6?01)[02-46-9]-*[0-9]{7}$|^(\+?6?01)[02-46-9]-*[0-9]{8}$|^(\+?6?01)[1]-*[0-9]{8}$/
 );
 
 export const NRIC_REGEX = new RegExp(

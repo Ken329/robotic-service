@@ -70,6 +70,10 @@ export const DOB_REGEX = new RegExp(
   /(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d/
 );
 
+export const EMAIL_REGEX = new RegExp(
+  /^[a-zA-Z0-9_.+]+(?<!^[0-9]*)@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
+);
+
 export const VALID_FILE_TYPE = ['.jpg', '.png', '.pdf'];
 
 export const VALID_FILE_MIME_TYPE = ['image/jpeg', 'application/pdf'];

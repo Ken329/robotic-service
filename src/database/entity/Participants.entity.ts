@@ -25,7 +25,7 @@ export class Participants {
   @Column({ type: 'uuid', nullable: false })
   studentId: string;
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: false })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   attributes: string;
 
   @CreateDateColumn()

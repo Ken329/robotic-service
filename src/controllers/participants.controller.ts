@@ -29,7 +29,11 @@ const findAllById = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const create = async (req: Request, res: Response) =>
-  ParticipantService.create(req.params.id, get(req, 'user.studentId'))
+  ParticipantService.create(
+    req.params.id,
+    get(req, 'user.studentId'),
+    get(req, 'body.attributes', [])
+  )
     .then((data) =>
       successApiResponse(res, 'Successfully join competition', data)
     )

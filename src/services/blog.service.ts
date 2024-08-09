@@ -1,4 +1,4 @@
-import { get, set, pick, map, compact } from 'lodash';
+import { get, set, pick, map, compact, isString } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import { throwErrorsHttp } from '../utils/helpers';
 import { BlogRepository } from '../database/dataSource';
@@ -16,6 +16,7 @@ type BlogResponse = {
   url: string;
   createdAt: string;
   content?: string;
+  customAttributes?: object;
 };
 
 class BlogService {
@@ -50,6 +51,7 @@ class BlogService {
         'views',
         'createdAt'
       ]),
+      customAttributes: JSON.parse(result.customAttributes),
       url: `${process.env.APP_URL}/api/file/${result.coverImage}`
     };
 
@@ -122,6 +124,7 @@ class BlogService {
     assigned: string;
     coverImage: string;
     content: string;
+    customAttributes?: object;
   }): Promise<BlogResponse> {
     const blog = new Blog();
     blog.title = payload.title;
@@ -131,6 +134,9 @@ class BlogService {
     blog.assigned = payload.assigned.replaceAll(' ', '');
     blog.coverImage = payload.coverImage;
     blog.content = payload.content;
+    blog.customAttributes = JSON.stringify(
+      get(payload, 'customAttributes', [])
+    );
 
     const result = await this.blogRepository.save(blog);
     return {
@@ -144,6 +150,7 @@ class BlogService {
         'views'
       ]),
       url: `${process.env.APP_URL}/api/file/${result.coverImage}`,
+      customAttributes: JSON.parse(result.customAttributes),
       createdAt: result.createdAt
     };
   }
@@ -159,6 +166,7 @@ class BlogService {
       coverImage?: string;
       content?: string;
       views?: number;
+      customAttributes?: object;
     }
   ): Promise<BlogResponse> {
     const blog = await this.find(id);
@@ -172,21 +180,36 @@ class BlogService {
       'content',
       'coverImage',
       'views',
-      'createdAt'
+      'createdAt',
+      'customAttributes'
     ]);
-    if (updatedPayload.assigned)
+    if (updatedPayload.assigned) {
       set(
         updatedPayload,
         'assigned',
         updatedPayload.assigned.replaceAll(' ', '')
       );
+    }
+    if (updatedPayload.customAttributes) {
+      set(
+        updatedPayload,
+        'customAttributes',
+        JSON.stringify(updatedPayload.customAttributes)
+      );
+    }
 
     await this.blogRepository.update({ id: blog.id }, updatedPayload);
 
-    return {
-      ...blog,
-      ...updatedPayload
-    };
+    const result = { ...blog, ...updatedPayload };
+    const { customAttributes } = result;
+    set(
+      result,
+      'customAttributes',
+      isString(customAttributes)
+        ? JSON.parse(customAttributes)
+        : customAttributes
+    );
+    return result;
   }
 
   public async delete(id: string): Promise<boolean> {

@@ -10,6 +10,7 @@ type ParticipantsResponse = {
   id: string;
   blogId: string;
   studentId: string;
+  attributes?: object;
 };
 
 class ParticipantsService {
@@ -29,7 +30,10 @@ class ParticipantsService {
 
     if (!result) return null;
 
-    return pick(result, ['id', 'blogId', 'studentId']);
+    return {
+      ...pick(result, ['id', 'blogId', 'studentId']),
+      attributes: JSON.parse(result.attributes)
+    };
   }
 
   public async findAll(studentId: string): Promise<
@@ -75,6 +79,7 @@ class ParticipantsService {
       levelName: string;
       centerName: string;
       createdAt: string;
+      attributes: object;
     }[]
   > {
     const result = await this.participantsRepository.find({
@@ -98,6 +103,7 @@ class ParticipantsService {
             name: true
           }
         },
+        attributes: true,
         createdAt: true
       }
     });
@@ -111,6 +117,7 @@ class ParticipantsService {
           level: { name: string };
           user: { id: string; email: string; center: { name: string } };
         };
+        attributes: string;
         createdAt: string;
       }) => ({
         title: el.blogId.title,
@@ -120,6 +127,7 @@ class ParticipantsService {
         email: el.studentId.user.email,
         levelName: el.studentId.level.name,
         centerName: el.studentId.user.center.name,
+        attributes: JSON.parse(el.attributes),
         createdAt: el.createdAt
       })
     );
@@ -127,7 +135,8 @@ class ParticipantsService {
 
   public async create(
     blogId: string,
-    studentId: string
+    studentId: string,
+    attributes: object
   ): Promise<ParticipantsResponse> {
     const blog = await BlogService.find(blogId);
 
@@ -150,9 +159,13 @@ class ParticipantsService {
     const participants = new Participants();
     participants.blogId = blogId;
     participants.studentId = studentId;
+    participants.attributes = JSON.stringify(attributes);
 
     const result = await this.participantsRepository.save(participants);
-    return pick(result, ['id', 'blogId', 'studentId']);
+    return {
+      ...pick(result, ['id', 'blogId', 'studentId']),
+      attributes: JSON.parse(result.attributes)
+    };
   }
 }
 

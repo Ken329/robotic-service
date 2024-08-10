@@ -364,7 +364,7 @@ class UserService {
     for (let i = 0; i < students.data.length; i += 1) {
       const email = get(students.data, `${i}.email`, '');
       if (email !== userInfo.email) {
-        result.push(email);
+        result.push({ email, name: get(students.data, `${i}.name`) });
       }
     }
 

@@ -53,7 +53,11 @@ route.get(
 
 route.get(
   '/api/user/students',
-  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  authenticate([
+    AUTH_STRATEGY.ADMIN,
+    AUTH_STRATEGY.CENTER,
+    AUTH_STRATEGY.APPROVED_STUDENT
+  ]),
   validate(Validators.userValidators.getUsers),
   userController.getStudents
 );

@@ -19,15 +19,23 @@ const getUser = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-const getStudents = async (req: Request, res: Response) =>
-  UserService.users(ROLE.STUDENT, req.query, {
-    role: get(req.user, 'role'),
-    centerId: get(req.user, 'centerId')
-  })
-    .then((data) =>
-      successApiResponse(res, 'Successfully get list of students', data)
-    )
-    .catch((error) => errorApiResponse(res, error.message));
+const getStudents = async (req: Request, res: Response) => {
+  const role = get(req.user, 'role');
+  try {
+    const data =
+      role === ROLE.STUDENT
+        ? await UserService.studentEmail(
+            pick(req.user, ['email', 'role', 'centerId'])
+          )
+        : await UserService.users(ROLE.STUDENT, req.query, {
+            role: role,
+            centerId: get(req.user, 'centerId')
+          });
+    return successApiResponse(res, 'Successfully get list of students', data);
+  } catch (error) {
+    return errorApiResponse(res, error.message);
+  }
+};
 
 const getCenters = async (req: Request, res: Response) =>
   UserService.users(ROLE.CENTER, req.query)

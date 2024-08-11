@@ -1,4 +1,4 @@
-import { get, pick, map } from 'lodash';
+import { get, pick, map, set } from 'lodash';
 import ExcelJs from 'exceljs';
 import httpStatusCode from 'http-status-codes';
 import {
@@ -113,7 +113,10 @@ class FileService {
     return true;
   }
 
-  public async generateStudentsExcel(): Promise<any> {
+  public async generateStudentsExcel(userInfo: {
+    role?: ROLE;
+    centerId?: string;
+  }): Promise<any> {
     const workbook = new ExcelJs.Workbook();
     workbook.creator = 'Robotic SteamCup';
     workbook.created = new Date();
@@ -159,8 +162,11 @@ class FileService {
       { header: 'Expiry Date', key: 'expiryDate', width: 20 }
     ];
 
+    const where = { role: ROLE.STUDENT };
+    if (userInfo.role === ROLE.CENTER) set(where, 'center', userInfo.centerId);
+
     const users = await this.userRepository.find({
-      where: { role: ROLE.STUDENT },
+      where,
       relations: ['center', 'student', 'student.level']
     });
 

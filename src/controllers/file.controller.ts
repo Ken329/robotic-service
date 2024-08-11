@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { Request, Response } from 'express';
 import FileService from '../services/file.service';
 import { successApiResponse, errorApiResponse } from '../utils/helpers';
@@ -29,7 +30,7 @@ const remove = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const generateStudentExcel = async (req: Request, res: Response) =>
-  FileService.generateStudentsExcel()
+  FileService.generateStudentsExcel(get(req, 'user'))
     .then((data) => {
       res.type('application/vnd.ms-excel');
       res.set('Content-Disposition', 'attachment; filename=students.xlsx');

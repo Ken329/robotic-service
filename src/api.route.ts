@@ -234,7 +234,7 @@ route.get(
 
 route.get(
   '/api/file/excel',
-  authenticate(AUTH_STRATEGY.ADMIN),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   fileController.generateStudentExcel
 );
 

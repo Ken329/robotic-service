@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import moment from 'moment';
 import { In } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
-import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import { find, get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
 import CenterService from './center.service';
 import AwsCognitoService from './awsCognito.service';
@@ -230,7 +230,12 @@ class UserService {
     rejected?: any;
   }> {
     const query = pick(optional, ['status']);
-    if (get(userInfo, 'role', null) === ROLE.CENTER) {
+    if (
+      find(
+        [ROLE.STUDENT, ROLE.CENTER],
+        (el) => el === get(userInfo, 'role', null)
+      )
+    ) {
       set(query, 'center', get(userInfo, 'centerId', null));
     }
 
@@ -354,6 +359,7 @@ class UserService {
     role?: ROLE;
     centerId?: string;
   }): Promise<string[]> {
+    console.log(userInfo);
     const students = await this.users(
       ROLE.STUDENT,
       { status: USER_STATUS.APPROVED },

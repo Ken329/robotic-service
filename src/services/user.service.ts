@@ -354,9 +354,11 @@ class UserService {
     role?: ROLE;
     centerId?: string;
   }): Promise<string[]> {
-    const students = await this.users(ROLE.STUDENT, {
-      status: USER_STATUS.APPROVED
-    });
+    const students = await this.users(
+      ROLE.STUDENT,
+      { status: USER_STATUS.APPROVED },
+      userInfo
+    );
 
     const result = [];
     for (let i = 0; i < students.data.length; i += 1) {

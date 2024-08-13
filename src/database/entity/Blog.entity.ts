@@ -41,6 +41,9 @@ export class Blog {
   @Column({ nullable: false, default: 0 })
   views: number;
 
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  customAttributes: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

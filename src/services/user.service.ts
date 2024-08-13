@@ -220,7 +220,7 @@ class UserService {
   public async users(
     role: ROLE,
     optional: { status?: USER_STATUS },
-    userInfo?: { role: ROLE; centerId: string }
+    userInfo?: { role?: ROLE; centerId?: string }
   ): Promise<{
     data: UserResponse[];
     totalUser: number;
@@ -347,6 +347,28 @@ class UserService {
       if (role === ROLE.CENTER) CenterService.delete(centerId);
       throw new Error(error.message);
     }
+  }
+
+  public async studentEmail(userInfo: {
+    email?: string;
+    role?: ROLE;
+    centerId?: string;
+  }): Promise<string[]> {
+    const students = await this.users(
+      ROLE.STUDENT,
+      { status: USER_STATUS.APPROVED },
+      userInfo
+    );
+
+    const result = [];
+    for (let i = 0; i < students.data.length; i += 1) {
+      const email = get(students.data, `${i}.email`, '');
+      if (email !== userInfo.email) {
+        result.push({ email, name: get(students.data, `${i}.name`) });
+      }
+    }
+
+    return result;
   }
 
   public async update(id: string, status: USER_STATUS): Promise<Boolean> {

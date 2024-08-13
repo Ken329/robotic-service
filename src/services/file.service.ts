@@ -1,4 +1,4 @@
-import { get, pick, map } from 'lodash';
+import { get, pick, map, set } from 'lodash';
 import ExcelJs from 'exceljs';
 import httpStatusCode from 'http-status-codes';
 import {
@@ -113,7 +113,10 @@ class FileService {
     return true;
   }
 
-  public async generateStudentsExcel(): Promise<any> {
+  public async generateStudentsExcel(userInfo: {
+    role?: ROLE;
+    centerId?: string;
+  }): Promise<any> {
     const workbook = new ExcelJs.Workbook();
     workbook.creator = 'Robotic SteamCup';
     workbook.created = new Date();
@@ -159,8 +162,11 @@ class FileService {
       { header: 'Expiry Date', key: 'expiryDate', width: 20 }
     ];
 
+    const where = { role: ROLE.STUDENT };
+    if (userInfo.role === ROLE.CENTER) set(where, 'center', userInfo.centerId);
+
     const users = await this.userRepository.find({
-      where: { role: ROLE.STUDENT },
+      where,
       relations: ['center', 'student', 'student.level']
     });
 
@@ -218,7 +224,7 @@ class FileService {
       throwErrorsHttp('Wrong blog id', httpStatusCode.BAD_REQUEST);
 
     const worksheet = workbook.addWorksheet(participants[0].title);
-    worksheet.columns = [
+    const columns = [
       { header: 'Id', key: 'id', width: 40 },
       { header: 'Student ID', key: 'studentId', width: 40 },
       { header: 'Email', key: 'email', width: 32 },
@@ -227,16 +233,37 @@ class FileService {
       { header: 'Center', key: 'center', width: 20 },
       { header: 'Join Date', key: 'createdAt', width: 20 }
     ];
+    const attributes = get(participants, '0.attributes', []);
+    for (let i = 0; i < attributes.length; i += 1) {
+      const category = get(attributes, `${i}.category`);
+      columns.push({ header: category, key: category, width: 40 });
+    }
+    worksheet.columns = columns;
 
-    const mappedUsers = map(participants, (participant) => ({
-      id: participant.id,
-      studentId: participant.studentId,
-      email: participant.email,
-      contact: participant.contact,
-      level: participant.levelName,
-      center: participant.centerName,
-      createdAt: participant.createdAt
-    }));
+    const mappedUsers = map(participants, (participant) => {
+      const attributes = Object.assign(
+        {},
+        ...map(participant.attributes, (attribute) => {
+          return {
+            [get(attribute, 'category', 'Category')]: get(
+              attribute,
+              'value',
+              'Value'
+            )
+          };
+        })
+      );
+      return {
+        id: participant.id,
+        studentId: participant.studentId,
+        email: participant.email,
+        contact: participant.contact,
+        level: participant.levelName,
+        center: participant.centerName,
+        createdAt: participant.createdAt,
+        ...attributes
+      };
+    });
 
     worksheet.addRows(mappedUsers);
     return workbook.xlsx.writeBuffer();

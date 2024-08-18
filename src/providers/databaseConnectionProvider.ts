@@ -8,7 +8,10 @@ const connectionChecker = async (
   next: NextFunction
 ) => {
   try {
-    if (!dataSource.isInitialized) await dataSource.initialize();
+    if (!dataSource.isInitialized) {
+      await dataSource.initialize();
+      await dataSource.runMigrations();
+    }
     next();
   } catch (error) {
     res.status(httpStatus.EXPECTATION_FAILED).json({

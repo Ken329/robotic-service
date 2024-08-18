@@ -23,6 +23,7 @@ const dbConnection = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
+  options: { encrypt: false },
   entities: [
     User,
     File,
@@ -35,7 +36,8 @@ const dbConnection = new DataSource({
     Participants,
     StudentAchievements
   ],
-  options: { encrypt: false }
+  migrations: ['src/database/migrations/*{.ts,.js}'],
+  migrationsTableName: '_migrations'
 });
 
 export const UserRepository = dbConnection.getRepository(User);

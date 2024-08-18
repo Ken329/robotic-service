@@ -12,6 +12,8 @@ import { Achievement } from './entity/Achievement.entity';
 import { Participants } from './entity/Participants.entity';
 import { StudentAchievements } from './entity/StudentAchievements.entity';
 
+import { updateRace1723965557693 as updateRace } from './migrations/1723965557693_update_race';
+
 dotenv.config();
 
 const dbConnection = new DataSource({
@@ -36,7 +38,7 @@ const dbConnection = new DataSource({
     Participants,
     StudentAchievements
   ],
-  migrations: ['src/database/migrations/*{.ts,.js}'],
+  migrations: [updateRace],
   migrationsTableName: '_migrations'
 });
 

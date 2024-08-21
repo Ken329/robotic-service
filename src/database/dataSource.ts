@@ -11,8 +11,9 @@ import { UserSession } from './entity/UserSession.entity';
 import { Achievement } from './entity/Achievement.entity';
 import { Participants } from './entity/Participants.entity';
 import { StudentAchievements } from './entity/StudentAchievements.entity';
-
-import { updateRace1724250791645 as updateRace } from './migrations/1724250791645_updateRace';
+import { updateRace1723965557693 as updateRace } from './migrations/1723965557693_updateRace';
+import { updateRace1724250791645 as updateRace2 } from './migrations/1724250791645_updateRace2';
+import { updateOthersRace1723971531137 as updateOtherRace } from './migrations/1723971531137_updateOthersRace';
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ const dbConnection = new DataSource({
     Participants,
     StudentAchievements
   ],
-  migrations: [updateRace],
+  migrations: [updateRace, updateOtherRace, updateRace2],
   migrationsTableName: '_migrations'
 });
 

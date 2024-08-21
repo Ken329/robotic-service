@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class updateRace1723965557693 implements MigrationInterface {
+export class updateRace1724250791645 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
       `UPDATE student SET race = 'Indian' WHERE race = 'indian'`
@@ -10,6 +10,9 @@ export class updateRace1723965557693 implements MigrationInterface {
     );
     await queryRunner.query(
       `UPDATE student SET race = 'Malay' WHERE race = 'malay'`
+    );
+    await queryRunner.query(
+      `UPDATE student SET race = 'Others' WHERE race = 'others'`
     );
   }
   public async down(queryRunner: QueryRunner): Promise<any> {
@@ -21,6 +24,9 @@ export class updateRace1723965557693 implements MigrationInterface {
     );
     await queryRunner.query(
       `UPDATE student SET race = 'malay' WHERE race = 'Malay'`
+    );
+    await queryRunner.query(
+      `UPDATE student SET race = 'others' WHERE race = 'Others'`
     );
   }
 }

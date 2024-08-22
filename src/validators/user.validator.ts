@@ -14,6 +14,10 @@ const emptyStringToNull = z.literal('').transform(() => null);
 
 const getUsers = z.object({
   query: z.object({
+    name: z
+      .string({ required_error: 'Name is required' })
+      .optional()
+      .or(emptyStringToNull),
     status: z
       .enum(
         [
@@ -26,7 +30,9 @@ const getUsers = z.object({
         { required_error: 'Status is valid' }
       )
       .optional()
-      .or(emptyStringToNull)
+      .or(emptyStringToNull),
+    page: z.string().optional(),
+    limit: z.string().optional()
   })
 });
 

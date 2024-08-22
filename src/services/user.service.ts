@@ -239,9 +239,11 @@ class UserService {
       set(query, 'center', get(userInfo, 'centerId', null));
     }
 
-    const users = await this.userRepository.find({
+    const [users, total] = await this.userRepository.findAndCount({
       where: { role, ...query },
-      relations: ['center', 'student']
+      relations: ['center', 'student'],
+      skip: 0,
+      take: 10
     });
 
     const expiredStudent = [];

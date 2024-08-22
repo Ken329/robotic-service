@@ -1,9 +1,9 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import moment from 'moment';
-import { In } from 'typeorm';
+import { In, Like, Not } from 'typeorm';
 import httpStatusCode from 'http-status-codes';
-import { find, get, groupBy, isEmpty, map, pick, set } from 'lodash';
+import { get, groupBy, isEmpty, map, pick, set } from 'lodash';
 import LevelService from './level.service';
 import CenterService from './center.service';
 import AwsCognitoService from './awsCognito.service';
@@ -217,42 +217,69 @@ class UserService {
     };
   }
 
-  public async users(
-    role: ROLE,
-    optional: { status?: USER_STATUS },
+  public async students(
+    optional: {
+      name?: string;
+      status?: USER_STATUS;
+      page?: number;
+      limit?: number;
+    },
     userInfo?: { role?: ROLE; centerId?: string }
   ): Promise<{
     data: UserResponse[];
     totalUser: number;
+    totalPage: number;
+    'pending verification'?: any;
     'pending center'?: any;
     'pending admin'?: any;
     approved?: any;
     rejected?: any;
   }> {
     const query = pick(optional, ['status']);
-    if (
-      find(
-        [ROLE.STUDENT, ROLE.CENTER],
-        (el) => el === get(userInfo, 'role', null)
-      )
-    ) {
-      set(query, 'center', get(userInfo, 'centerId', null));
+
+    if (get(userInfo, 'role', null) === ROLE.CENTER) {
+      set(query, 'center', userInfo.centerId);
+    }
+
+    if (optional.name) {
+      set(query, 'student.fullName', Like(`%${optional.name}%`));
+    }
+
+    let skip = 0,
+      take = 10;
+    if (optional.page && optional.limit) {
+      take = Number(optional.limit) * Number(optional.page);
+      skip = take - Number(optional.limit);
     }
 
     const [users, total] = await this.userRepository.findAndCount({
-      where: { role, ...query },
+      skip,
+      take,
       relations: ['center', 'student'],
-      skip: 0,
-      take: 10
+      where: { role: ROLE.STUDENT, ...query },
+      select: {
+        id: true,
+        role: true,
+        email: true,
+        status: true,
+        createdAt: true,
+        student: {
+          id: true,
+          fullName: true,
+          roboticId: true
+        },
+        center: {
+          id: true,
+          name: true
+        }
+      },
+      order: { createdAt: 'DESC' }
     });
 
     const expiredStudent = [];
     const mappedUsers = map(users, (user) => {
       const payload = pick(user, ['id', 'role', 'email', 'status']);
-      if (
-        role === ROLE.STUDENT &&
-        moment().isAfter(get(user.student, 'expiryDate', null))
-      ) {
+      if (moment().isAfter(get(user.student, 'expiryDate', null))) {
         expiredStudent.push(user.id);
         payload.status = USER_STATUS.EXPIRED;
       }
@@ -277,10 +304,71 @@ class UserService {
     });
 
     return {
-      totalUser: mappedUsers.length,
       ...groupedUserStatus,
-      data: mappedUsers
+      data: mappedUsers,
+      totalUser: total,
+      totalPage: Math.ceil(total / Number(optional.limit))
     };
+  }
+
+  public async studentEmail(userInfo: {
+    email?: string;
+    centerId?: string;
+  }): Promise<{ email: string; name: string }[]> {
+    const students = await this.userRepository.find({
+      where: {
+        role: ROLE.STUDENT,
+        center: userInfo.centerId,
+        status: USER_STATUS.APPROVED,
+        email: Not(userInfo.email)
+      },
+      relations: ['student'],
+      select: {
+        email: true,
+        student: {
+          fullName: true
+        }
+      }
+    });
+
+    return map(students, (el) => ({
+      email: el.email,
+      name: el.student.fullName
+    }));
+  }
+
+  public async centers(optional: {
+    status?: USER_STATUS;
+  }): Promise<UserResponse[]> {
+    const query = pick(optional, ['status']);
+
+    const users = await this.userRepository.find({
+      where: { role: ROLE.CENTER, ...query },
+      relations: ['center', 'student'],
+      select: {
+        id: true,
+        role: true,
+        email: true,
+        status: true,
+        center: {
+          id: true,
+          name: true
+        }
+      }
+    });
+
+    return users.map(
+      (el: {
+        id: string;
+        email: string;
+        status: USER_STATUS;
+        center: { id: string; name: string };
+      }) => ({
+        ...pick(el, ['id', 'email', 'status']),
+        centerId: el.center.id,
+        centerName: el.center.name
+      })
+    );
   }
 
   public async create(
@@ -354,29 +442,6 @@ class UserService {
       if (role === ROLE.CENTER) CenterService.delete(centerId);
       throw new Error(error.message);
     }
-  }
-
-  public async studentEmail(userInfo: {
-    email?: string;
-    role?: ROLE;
-    centerId?: string;
-  }): Promise<string[]> {
-    console.log(userInfo);
-    const students = await this.users(
-      ROLE.STUDENT,
-      { status: USER_STATUS.APPROVED },
-      userInfo
-    );
-
-    const result = [];
-    for (let i = 0; i < students.data.length; i += 1) {
-      const email = get(students.data, `${i}.email`, '');
-      if (email !== userInfo.email) {
-        result.push({ email, name: get(students.data, `${i}.name`) });
-      }
-    }
-
-    return result;
   }
 
   public async update(id: string, status: USER_STATUS): Promise<Boolean> {

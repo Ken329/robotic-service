@@ -70,6 +70,12 @@ route.get(
 );
 
 route.get(
+  '/api/user/statuses',
+  authenticate([AUTH_STRATEGY.ADMIN]),
+  userController.getStudentStatuses
+);
+
+route.get(
   '/api/user/:id',
   authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   validate(Validators.paramsId),

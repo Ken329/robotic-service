@@ -32,6 +32,15 @@ const getStudents = async (req: Request, res: Response) => {
   }
 };
 
+const getStudentStatuses = async (req: Request, res: Response) => {
+  try {
+    const data = await UserService.studentStatuses(ROLE.STUDENT);
+    return successApiResponse(res, 'Successfully get student statuses', data);
+  } catch (error) {
+    return errorApiResponse(res, error.message);
+  }
+};
+
 const getCenters = async (req: Request, res: Response) =>
   UserService.centers(req.query)
     .then((data) =>
@@ -153,6 +162,7 @@ export default {
   user,
   getUser,
   getStudents,
+  getStudentStatuses,
   createStudent,
   updateStudent,
   deleteStudent,

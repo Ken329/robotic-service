@@ -227,13 +227,10 @@ class UserService {
     userInfo?: { role?: ROLE; centerId?: string }
   ): Promise<{
     data: UserResponse[];
+    page: number;
+    limit: number;
     totalUser: number;
     totalPage: number;
-    'pending verification'?: any;
-    'pending center'?: any;
-    'pending admin'?: any;
-    approved?: any;
-    rejected?: any;
   }> {
     const query = pick(optional, ['status']);
 
@@ -245,12 +242,9 @@ class UserService {
       set(query, 'student.fullName', Like(`%${optional.name}%`));
     }
 
-    let skip = 0,
-      take = 10;
-    if (optional.page && optional.limit) {
-      take = Number(optional.limit) * Number(optional.page);
-      skip = take - Number(optional.limit);
-    }
+    const page = optional.page || 1;
+    const take = optional.limit || 10;
+    const skip = (page - 1) * take;
 
     const [users, total] = await this.userRepository.findAndCount({
       skip,
@@ -297,17 +291,13 @@ class UserService {
       { id: In(expiredStudent) },
       { status: USER_STATUS.EXPIRED }
     );
-    const groupedUsers = groupBy(mappedUsers, 'status');
-    const groupedUserStatus = {};
-    Object.keys(groupedUsers).forEach((key) => {
-      set(groupedUserStatus, key, groupedUsers[key].length);
-    });
 
     return {
-      ...groupedUserStatus,
       data: mappedUsers,
+      page: Number(page),
+      limit: Number(take),
       totalUser: total,
-      totalPage: Math.ceil(total / Number(optional.limit))
+      totalPage: Math.ceil(total / take)
     };
   }
 
@@ -335,6 +325,37 @@ class UserService {
       email: el.email,
       name: el.student.fullName
     }));
+  }
+
+  public async studentStatuses(role: ROLE): Promise<{
+    totalUser: number;
+    'pending verification'?: number;
+    'pending center'?: number;
+    'pending admin'?: number;
+    approved?: number;
+    rejected?: number;
+  }> {
+    const users = await this.userRepository.find({
+      where: { role },
+      select: { id: true, role: true, status: true }
+    });
+
+    const groupedUsers = groupBy(users, 'status');
+    const groupedUserStatus = {
+      'pending verification': 0,
+      'pending center': 0,
+      'pending admin': 0,
+      approved: 0,
+      rejected: 0
+    };
+    Object.keys(groupedUsers).forEach((key) => {
+      set(groupedUserStatus, key, groupedUsers[key].length);
+    });
+
+    return {
+      totalUser: users.length,
+      ...groupedUserStatus
+    };
   }
 
   public async centers(optional: {

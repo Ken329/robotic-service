@@ -327,7 +327,10 @@ class UserService {
     }));
   }
 
-  public async studentStatuses(role: ROLE): Promise<{
+  public async studentStatuses(
+    role: ROLE,
+    userInfo: { role?: ROLE; centerId?: string }
+  ): Promise<{
     totalUser: number;
     'pending verification'?: number;
     'pending center'?: number;
@@ -335,8 +338,11 @@ class UserService {
     approved?: number;
     rejected?: number;
   }> {
+    const where = { role };
+    if (userInfo.role === ROLE.CENTER) set(where, 'center', userInfo.centerId);
+
     const users = await this.userRepository.find({
-      where: { role },
+      where,
       select: { id: true, role: true, status: true }
     });
 

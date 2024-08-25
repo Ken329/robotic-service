@@ -71,7 +71,7 @@ route.get(
 
 route.get(
   '/api/user/statuses',
-  authenticate([AUTH_STRATEGY.ADMIN]),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   userController.getStudentStatuses
 );
 

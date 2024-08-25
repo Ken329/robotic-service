@@ -34,7 +34,7 @@ const getStudents = async (req: Request, res: Response) => {
 
 const getStudentStatuses = async (req: Request, res: Response) => {
   try {
-    const data = await UserService.studentStatuses(ROLE.STUDENT);
+    const data = await UserService.studentStatuses(ROLE.STUDENT, req.user);
     return successApiResponse(res, 'Successfully get student statuses', data);
   } catch (error) {
     return errorApiResponse(res, error.message);

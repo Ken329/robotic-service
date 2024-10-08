@@ -10,6 +10,7 @@ import {
 import { throwErrorsHttp } from '../utils/helpers';
 import { FileProviderRequest } from '../utils/constant';
 import { Achievement } from '../database/entity/Achievement.entity';
+import moment from 'moment';
 
 type AchievementResponse = {
   id: string;
@@ -78,15 +79,19 @@ class LevelService {
   }
 
   public async create(
-    payload: { title: string; description: string },
+    payload: { title: string; description: string; createdDate?: Date },
     file: FileProviderRequest
   ): Promise<AchievementResponse> {
     const imageData = await FileService.create(file);
 
     const achievement = new Achievement();
+    const createdDate = get(payload, 'createdDate', null);
     achievement.title = payload.title;
     achievement.description = payload.description;
     achievement.image = imageData.id;
+    achievement.createdAt = createdDate
+      ? moment(createdDate, 'DD/MM/YYYY').toDate()
+      : moment().toDate();
 
     const result = await this.achievementRepository.save(achievement);
     return {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DOB_REGEX } from '../utils/constant';
 
 const create = z.object({
   body: z.object({
@@ -7,7 +8,11 @@ const create = z.object({
       .min(1, { message: 'Name should not be empty' }),
     description: z
       .string({ required_error: 'Name is required' })
-      .min(1, { message: 'Name should not be empty' })
+      .min(1, { message: 'Name should not be empty' }),
+    createdDate: z
+      .string({ required_error: 'Created date is required' })
+      .regex(DOB_REGEX, 'Invalid created date format eg: 20/01/2000')
+      .optional()
   })
 });
 

@@ -87,6 +87,9 @@ export class Student {
   @Column({ type: 'date', nullable: true })
   expiryDate: Date;
 
+  @Column({ type: 'date', nullable: true })
+  statusChangeAt: Date;
+
   @Column({ type: 'varchar', enum: ROLE, nullable: true })
   rejectedBy: string;
 

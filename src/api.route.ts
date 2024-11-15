@@ -133,6 +133,13 @@ route.post(
 );
 
 route.post(
+  '/api/user/:id/retired',
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  validate(Validators.paramsId),
+  userController.retiredUser
+);
+
+route.post(
   '/api/user/renew',
   authenticate(AUTH_STRATEGY.STUDENT),
   validate(Validators.userValidators.studentUpdate),

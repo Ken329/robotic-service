@@ -46,7 +46,7 @@ export type UserResponse = {
   parentContact?: string;
   expiryDate?: Date;
   joinedDate?: string;
-  statusChangeAt?: string;
+  statusChangeAt?: Date;
   rejectedBy?: string;
 };
 
@@ -73,6 +73,7 @@ type StudentInfo = {
   parentConsent?: boolean;
   expiryDate?: Date;
   joinedDate?: string;
+  statusChangeAt?: Date;
 };
 
 class UserService {
@@ -477,10 +478,7 @@ class UserService {
   }
 
   public async update(id: string, status: USER_STATUS): Promise<Boolean> {
-    await this.userRepository.update(
-      { id },
-      { status, statusChangeAt: moment().toDate() }
-    );
+    await this.userRepository.update({ id }, { status });
     return true;
   }
 
@@ -513,7 +511,8 @@ class UserService {
       'parentContact',
       'parentConsent',
       'expiryDate',
-      'joinedDate'
+      'joinedDate',
+      'statusChangeAt'
     ]);
 
     if (filterPayload.level) {
@@ -624,8 +623,12 @@ class UserService {
         }-${process.env.EXPIRY_MONTH_DATE}`
       ).toDate();
 
-      await this.updateStudent(id, { expiryDate });
+      await this.updateStudent(id, {
+        expiryDate,
+        statusChangeAt: moment().toDate()
+      });
       userDetails.expiryDate = expiryDate;
+      userDetails.statusChangeAt = moment().toDate();
     }
 
     return {
@@ -643,18 +646,30 @@ class UserService {
     });
 
     await this.userRepository.update({ id }, { status: USER_STATUS.REJECT });
-    await this.studentRepository.update({ user: id }, { rejectedBy: role });
+    await this.studentRepository.update(
+      { user: id },
+      { rejectedBy: role, statusChangeAt: moment().toDate() }
+    );
     return {
       ...user,
+      rejectedBy: role,
       status: USER_STATUS.REJECT,
-      rejectedBy: role
+      statusChangeAt: moment().toDate()
     };
   }
 
   public async retired(id: string): Promise<UserResponse> {
     const user = await this.user(id, { status: USER_STATUS.APPROVED });
     await this.userRepository.update({ id }, { status: USER_STATUS.RETIRED });
-    return { ...user, status: USER_STATUS.RETIRED };
+    await this.studentRepository.update(
+      { user: id },
+      { statusChangeAt: moment().toDate() }
+    );
+    return {
+      ...user,
+      status: USER_STATUS.RETIRED,
+      statusChangeAt: moment().toDate()
+    };
   }
 
   public async renew(id: string, payload: StudentInfo): Promise<UserResponse> {
@@ -663,9 +678,11 @@ class UserService {
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
     set(payload, 'expiryDate', moment().endOf('year').toDate());
+    set(payload, 'statusChangeAt', moment().toDate());
     const userDetails = await this.updateStudent(id, payload);
 
     userDetails.status = USER_STATUS.PENDING_CENTER;
+    userDetails.statusChangeAt = moment().toDate();
     await this.update(id, userDetails.status);
 
     return userDetails;

@@ -158,6 +158,17 @@ const renewMembership = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
+const retiredUser = async (req: Request, res: Response) =>
+  UserService.retired(get(req.user, 'id'))
+    .then((data) =>
+      successApiResponse(
+        res,
+        `Successfully retired student - ${get(req.user, 'id')}`,
+        data
+      )
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
 export default {
   user,
   getUser,
@@ -172,5 +183,6 @@ export default {
   createAdmin,
   signUpApproval,
   signUpReject,
-  renewMembership
+  renewMembership,
+  retiredUser
 };

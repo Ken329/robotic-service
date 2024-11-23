@@ -46,6 +46,7 @@ export type UserResponse = {
   parentContact?: string;
   expiryDate?: Date;
   joinedDate?: string;
+  statusChangeAt?: Date;
   rejectedBy?: string;
 };
 
@@ -72,6 +73,7 @@ type StudentInfo = {
   parentConsent?: boolean;
   expiryDate?: Date;
   joinedDate?: string;
+  statusChangeAt?: Date;
 };
 
 class UserService {
@@ -131,6 +133,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          statusChangeAt: user.student.statusChangeAt,
           joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
@@ -192,6 +195,7 @@ class UserService {
           parentContact: user.student.parentContact,
           parentConsent: binaryToBool(user.student.parentConsent),
           expiryDate: user.student.expiryDate,
+          statusChangeAt: user.student.statusChangeAt,
           joinedDate: user.student.joinedDate,
           rejectedBy: user.student.rejectedBy
         }
@@ -260,7 +264,8 @@ class UserService {
         student: {
           id: true,
           fullName: true,
-          roboticId: true
+          roboticId: true,
+          statusChangeAt: true
         },
         center: {
           id: true,
@@ -283,7 +288,8 @@ class UserService {
         studentId: get(user.student, 'id', null),
         roboticId: get(user.student, 'roboticId', null),
         centerId: get(user.center, 'id', null),
-        centerName: get(user.center, 'name', null)
+        centerName: get(user.center, 'name', null),
+        statusChangeAt: get(user.student, 'statusChangeAt', null)
       };
     });
 
@@ -505,7 +511,8 @@ class UserService {
       'parentContact',
       'parentConsent',
       'expiryDate',
-      'joinedDate'
+      'joinedDate',
+      'statusChangeAt'
     ]);
 
     if (filterPayload.level) {
@@ -604,9 +611,24 @@ class UserService {
     await this.update(id, updatedStatus);
 
     if (updatedStatus === USER_STATUS.APPROVED) {
-      const expiryDate = moment().endOf('year').toDate();
-      await this.updateStudent(id, { expiryDate });
+      let expiryYear = moment().year();
+      const expiryDate = moment(
+        `${
+          moment(
+            `${expiryYear}-${process.env.EXPIRY_MONTH_DATE}`,
+            'YYYY-MM-DD'
+          ).isAfter(moment())
+            ? (expiryYear += 1)
+            : expiryYear
+        }-${process.env.EXPIRY_MONTH_DATE}`
+      ).toDate();
+
+      await this.updateStudent(id, {
+        expiryDate,
+        statusChangeAt: moment().toDate()
+      });
       userDetails.expiryDate = expiryDate;
+      userDetails.statusChangeAt = moment().toDate();
     }
 
     return {
@@ -624,11 +646,29 @@ class UserService {
     });
 
     await this.userRepository.update({ id }, { status: USER_STATUS.REJECT });
-    await this.studentRepository.update({ user: id }, { rejectedBy: role });
+    await this.studentRepository.update(
+      { user: id },
+      { rejectedBy: role, statusChangeAt: moment().toDate() }
+    );
     return {
       ...user,
+      rejectedBy: role,
       status: USER_STATUS.REJECT,
-      rejectedBy: role
+      statusChangeAt: moment().toDate()
+    };
+  }
+
+  public async retired(id: string): Promise<UserResponse> {
+    const user = await this.user(id, { status: USER_STATUS.APPROVED });
+    await this.userRepository.update({ id }, { status: USER_STATUS.RETIRED });
+    await this.studentRepository.update(
+      { user: id },
+      { statusChangeAt: moment().toDate() }
+    );
+    return {
+      ...user,
+      status: USER_STATUS.RETIRED,
+      statusChangeAt: moment().toDate()
     };
   }
 
@@ -638,9 +678,11 @@ class UserService {
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
     set(payload, 'expiryDate', moment().endOf('year').toDate());
+    set(payload, 'statusChangeAt', moment().toDate());
     const userDetails = await this.updateStudent(id, payload);
 
     userDetails.status = USER_STATUS.PENDING_CENTER;
+    userDetails.statusChangeAt = moment().toDate();
     await this.update(id, userDetails.status);
 
     return userDetails;

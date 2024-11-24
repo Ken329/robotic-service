@@ -611,23 +611,16 @@ class UserService {
     await this.update(id, updatedStatus);
 
     if (updatedStatus === USER_STATUS.APPROVED) {
-      let expiryYear = moment().year();
-      const expiryDate = moment(
-        `${
-          moment(
-            `${expiryYear}-${process.env.EXPIRY_MONTH_DATE}`,
-            'YYYY-MM-DD'
-          ).isAfter(moment())
-            ? (expiryYear += 1)
-            : expiryYear
-        }-${process.env.EXPIRY_MONTH_DATE}`
-      ).toDate();
+      const expiryDate = moment(`${moment().year()}-${'02-28'}`, 'YYYY-MM-DD');
+      if (expiryDate.isBefore(moment())) {
+        expiryDate.add(1, 'year');
+      }
 
       await this.updateStudent(id, {
-        expiryDate,
+        expiryDate: expiryDate.toDate(),
         statusChangeAt: moment().toDate()
       });
-      userDetails.expiryDate = expiryDate;
+      userDetails.expiryDate = expiryDate.toDate();
       userDetails.statusChangeAt = moment().toDate();
     }
 

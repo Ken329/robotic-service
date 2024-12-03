@@ -159,7 +159,8 @@ class FileService {
       { header: 'Parent Email', key: 'parentEmail', width: 32 },
       { header: 'Parent Contact', key: 'parentContact', width: 20 },
       { header: 'Parent Consent', key: 'parentConsent', width: 20 },
-      { header: 'Expiry Date', key: 'expiryDate', width: 20 }
+      { header: 'Expiry Date', key: 'expiryDate', width: 20 },
+      { header: 'Status Updated At', key: 'statusUpdatedAt', width: 20 }
     ];
 
     const where = { role: ROLE.STUDENT };
@@ -195,7 +196,8 @@ class FileService {
       parentEmail: get(user, 'student.parentEmail', null),
       parentContact: get(user, 'student.parentContact', null),
       parentConsent: get(user, 'student.parentConsent', null),
-      expiryDate: get(user, 'student.expiryDate', null)
+      expiryDate: get(user, 'student.expiryDate', null),
+      statusUpdatedAt: get(user, 'student.statusChangeAt', null)
     }));
 
     worksheet.addRows(mappedUsers);

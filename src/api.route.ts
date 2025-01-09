@@ -141,7 +141,8 @@ route.post(
 
 route.post(
   '/api/user/renew',
-  authenticate(AUTH_STRATEGY.STUDENT),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.STUDENT]),
+  validate(Validators.queryId),
   validate(Validators.userValidators.studentUpdate),
   userController.renewMembership
 );

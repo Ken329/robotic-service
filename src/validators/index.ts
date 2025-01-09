@@ -64,6 +64,15 @@ const paramsId = z.object({
   })
 });
 
+const queryId = z.object({
+  query: z.object({
+    id: z
+      .string({ required_error: 'Id is required' })
+      .uuid('Id is not valid')
+      .optional()
+  })
+});
+
 const paramsStudentId = z.object({
   params: z.object({
     studentId: z
@@ -73,6 +82,7 @@ const paramsStudentId = z.object({
 });
 
 export default {
+  queryId,
   paramsId,
   blogValidator,
   paramsStudentId,

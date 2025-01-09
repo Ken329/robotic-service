@@ -148,7 +148,11 @@ const signUpReject = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const renewMembership = async (req: Request, res: Response) =>
-  UserService.renew(get(req.user, 'id'), req.body)
+  UserService.renew(
+    get(get(req.user, 'role') === ROLE.ADMIN ? req.query : req.user, 'id'),
+    req.body,
+    get(req.user, 'role')
+  )
     .then((data) =>
       successApiResponse(
         res,

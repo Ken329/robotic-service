@@ -675,7 +675,6 @@ class UserService {
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
     const expiryDate = moment(`${moment().year()}-${'02-28'}`, 'YYYY-MM-DD');
-    console.log(expiryDate);
     set(payload, 'expiryDate', expiryDate.add(1, 'year').toDate());
     set(payload, 'statusChangeAt', moment().toDate());
 

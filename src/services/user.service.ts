@@ -665,25 +665,16 @@ class UserService {
     };
   }
 
-  public async renew(
-    id: string,
-    payload: StudentInfo,
-    userRole: string
-  ): Promise<UserResponse> {
+  public async renew(id: string, payload: StudentInfo): Promise<UserResponse> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
-    const expiryDate = moment(`${moment().year()}-${'02-28'}`, 'YYYY-MM-DD');
-    set(payload, 'expiryDate', expiryDate.add(1, 'year'));
+    set(payload, 'expiryDate', moment().endOf('year').toDate());
     set(payload, 'statusChangeAt', moment().toDate());
-
     const userDetails = await this.updateStudent(id, payload);
 
-    userDetails.status =
-      userRole === ROLE.STUDENT
-        ? USER_STATUS.PENDING_CENTER
-        : USER_STATUS.APPROVED;
+    userDetails.status = USER_STATUS.PENDING_CENTER;
     userDetails.statusChangeAt = moment().toDate();
     await this.update(id, userDetails.status);
 

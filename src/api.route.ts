@@ -140,9 +140,15 @@ route.post(
 );
 
 route.post(
+  '/api/user/:id/expired',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  userController.expiredUser
+);
+
+route.post(
   '/api/user/renew',
-  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.STUDENT]),
-  validate(Validators.queryId),
+  authenticate(AUTH_STRATEGY.STUDENT),
   validate(Validators.userValidators.studentUpdate),
   userController.renewMembership
 );

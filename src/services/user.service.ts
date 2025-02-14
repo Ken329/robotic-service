@@ -621,9 +621,7 @@ class UserService {
 
     if (updatedStatus === USER_STATUS.APPROVED) {
       const expiryDate = moment(`${moment().year()}-${'02-28'}`, 'YYYY-MM-DD');
-      if (expiryDate.isBefore(moment())) {
-        expiryDate.add(1, 'year');
-      }
+      expiryDate.add(1, 'year');
 
       await this.updateStudent(id, {
         expiryDate: expiryDate.toDate(),

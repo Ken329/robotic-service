@@ -620,7 +620,10 @@ class UserService {
     await this.update(id, updatedStatus);
 
     if (updatedStatus === USER_STATUS.APPROVED) {
-      const expiryDate = moment(`${moment().year()}-${'02-28'}`, 'YYYY-MM-DD');
+      const expiryDate = moment(
+        `${moment().year()}-${process.env.EXPIRY_DATE}`,
+        'YYYY-MM-DD'
+      );
       expiryDate.add(1, 'year');
 
       await this.updateStudent(id, {
@@ -678,7 +681,7 @@ class UserService {
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
     const expiryDate = moment(
-      `${moment().year()}-${'02-28'}`,
+      `${moment().year()}-${process.env.EXPIRY_DATE}`,
       'YYYY-MM-DD'
     ).add(1, 'year');
     set(payload, 'expiryDate', expiryDate.toDate());

@@ -25,7 +25,8 @@ const getUsers = z.object({
           USER_STATUS.PENDING_CENTER,
           USER_STATUS.PENDING_ADMIN,
           USER_STATUS.APPROVED,
-          USER_STATUS.REJECT
+          USER_STATUS.REJECT,
+          USER_STATUS.EXPIRED
         ],
         { required_error: 'Status is valid' }
       )

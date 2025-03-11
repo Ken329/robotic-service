@@ -1,4 +1,4 @@
-import { pick } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import httpStatusCode from 'http-status-codes';
 import BlogService from './blog.service';
 import { BLOG_CATEGORY, BLOG_TYPE } from '../utils/constant';
@@ -69,7 +69,10 @@ class ParticipantsService {
     }));
   }
 
-  public async findAllById(blogId: String): Promise<
+  public async findAllById(
+    blogId: String,
+    centerId?: String
+  ): Promise<
     {
       title: string;
       id: string;
@@ -82,8 +85,12 @@ class ParticipantsService {
       attributes: object;
     }[]
   > {
+    const where = { blogId };
+    if (!isEmpty(centerId)) {
+      where['studentId'] = { user: { center: centerId } };
+    }
     const result = await this.participantsRepository.find({
-      where: { blogId },
+      where,
       relations: ['blogId', 'studentId.level', 'studentId.user.center'],
       select: {
         blogId: {

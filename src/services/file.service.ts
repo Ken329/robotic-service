@@ -204,7 +204,13 @@ class FileService {
     return workbook.xlsx.writeBuffer();
   }
 
-  public async generateCompetitionExcel(id: string): Promise<any> {
+  public async generateCompetitionExcel(
+    id: string,
+    userInfo: {
+      role?: ROLE;
+      centerId?: string;
+    }
+  ): Promise<any> {
     const workbook = new ExcelJs.Workbook();
     workbook.creator = 'Robotic SteamCup';
     workbook.created = new Date();
@@ -221,7 +227,11 @@ class FileService {
       }
     ];
 
-    const participants = await ParticipantService.findAllById(id);
+    const participants = await ParticipantService.findAllById(
+      id,
+      userInfo.role === ROLE.CENTER ? userInfo.centerId : null
+    );
+
     if (participants.length < 1)
       throwErrorsHttp('Wrong blog id', httpStatusCode.BAD_REQUEST);
 

@@ -39,7 +39,7 @@ const generateStudentExcel = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const generateCompetitionExcel = async (req: Request, res: Response) =>
-  FileService.generateCompetitionExcel(req.params.id)
+  FileService.generateCompetitionExcel(req.params.id, get(req, 'user'))
     .then((data) => {
       res.type('application/vnd.ms-excel');
       res.set('Content-Disposition', 'attachment; filename=students.xlsx');

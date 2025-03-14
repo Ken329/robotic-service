@@ -319,7 +319,7 @@ route.get(
 
 route.get(
   '/api/blog/:id/participants',
-  authenticate(AUTH_STRATEGY.ADMIN),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   validate(Validators.paramsId),
   participantsController.findAllById
 );

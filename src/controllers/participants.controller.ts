@@ -27,7 +27,10 @@ const findAllById = async (req: Request, res: Response) =>
     .then((data) =>
       successApiResponse(res, 'Successfully get all participants', data)
     )
-    .catch((error) => errorApiResponse(res, error.message));
+    .catch((error) => {
+      console.log(error.message)
+      return errorApiResponse(res, error.message)
+    });
 
 const create = async (req: Request, res: Response) =>
   ParticipantService.create(

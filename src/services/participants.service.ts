@@ -85,10 +85,12 @@ class ParticipantsService {
       attributes: object;
     }[]
   > {
+    // console.log(blogId, centerId);
     const where = { blogId };
-    if (!isEmpty(centerId)) {
-      where['studentId'] = { user: { center: centerId } };
-    }
+    // if (!isEmpty(centerId)) {
+    //   where['studentId'] = { user: { center: {id: centerId} } };
+    // }
+    // console.log(where)
     const result = await this.participantsRepository.find({
       where,
       relations: ['blogId', 'studentId.level', 'studentId.user.center'],
@@ -103,6 +105,7 @@ class ParticipantsService {
             id: true,
             email: true,
             center: {
+              id: true,
               name: true
             }
           },
@@ -115,29 +118,24 @@ class ParticipantsService {
       }
     });
 
-    return result.map(
-      (el: {
-        blogId: { title: string };
-        studentId: {
-          id: string;
-          contact: string;
-          level: { name: string };
-          user: { id: string; email: string; center: { name: string } };
-        };
-        attributes: string;
-        createdAt: string;
-      }) => ({
-        title: el.blogId.title,
-        id: el.studentId.user.id,
-        studentId: el.studentId.id,
-        contact: el.studentId.contact,
-        email: el.studentId.user.email,
-        levelName: el.studentId.level.name,
-        centerName: el.studentId.user.center.name,
-        attributes: JSON.parse(el.attributes),
-        createdAt: el.createdAt
-      })
-    );
+    const mappedParticipants = []
+    for (let i = 0; i < mappedParticipants.length; i++) {
+      const el = mappedParticipants[i]
+      if(isEmpty(centerId) || el.studentId.user.center.id === centerId){
+        mappedParticipants.push({
+         title: el.blogId.title,
+         id: el.studentId.user.id,
+         studentId: el.studentId.id,
+         contact: el.studentId.contact,
+         email: el.studentId.user.email,
+         levelName: el.studentId.level.name,
+         centerName: el.studentId.user.center.name,
+         attributes: JSON.parse(el.attributes),
+         createdAt: el.createdAt
+       })
+      }
+    }
+    return mappedParticipants;
   }
 
   public async create(

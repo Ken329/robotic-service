@@ -85,12 +85,7 @@ class ParticipantsService {
       attributes: object;
     }[]
   > {
-    // console.log(blogId, centerId);
     const where = { blogId };
-    // if (!isEmpty(centerId)) {
-    //   where['studentId'] = { user: { center: {id: centerId} } };
-    // }
-    // console.log(where)
     const result = await this.participantsRepository.find({
       where,
       relations: ['blogId', 'studentId.level', 'studentId.user.center'],
@@ -119,8 +114,11 @@ class ParticipantsService {
     });
 
     const mappedParticipants = []
-    for (let i = 0; i < mappedParticipants.length; i++) {
-      const el = mappedParticipants[i]
+    for (let i = 0; i < result.length; i++) {
+      const el = result[i]
+      console.log("STUDENT CENTER: " + el.studentId.user.center.id)
+      console.log("CENTER: " +  centerId)
+      console.log("MATCHED: " + el.studentId.user.center.id === centerId)
       if(isEmpty(centerId) || el.studentId.user.center.id === centerId){
         mappedParticipants.push({
          title: el.blogId.title,

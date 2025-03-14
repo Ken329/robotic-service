@@ -260,7 +260,7 @@ route.get(
 
 route.get(
   '/api/file/excel/:id',
-  authenticate(AUTH_STRATEGY.ADMIN),
+  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
   fileController.generateCompetitionExcel
 );
 
@@ -282,7 +282,7 @@ route.delete(
 );
 
 /**
- * File Routes
+ * Blog Routes
  */
 route.get(
   '/api/blog',
@@ -319,7 +319,7 @@ route.get(
 
 route.get(
   '/api/blog/:id/participants',
-  authenticate([AUTH_STRATEGY.ADMIN, AUTH_STRATEGY.CENTER]),
+  authenticate(AUTH_STRATEGY.ADMIN),
   validate(Validators.paramsId),
   participantsController.findAllById
 );

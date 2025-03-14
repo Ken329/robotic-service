@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import { Request, Response } from 'express';
 import ParticipantService from '../services/participants.service';
 import { successApiResponse, errorApiResponse } from '../utils/helpers';
-import { ROLE } from '../utils/constant';
 
 const find = async (req: Request, res: Response) =>
   ParticipantService.find(req.params.id, get(req, 'user.studentId'))
@@ -23,10 +22,7 @@ const findAll = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const findAllById = async (req: Request, res: Response) =>
-  ParticipantService.findAllById(
-    req.params.id,
-    get(req, 'user.role') === ROLE.CENTER ? get(req, 'user.centerId') : null
-  )
+  ParticipantService.findAllById(req.params.id)
     .then((data) =>
       successApiResponse(res, 'Successfully get all participants', data)
     )

@@ -237,13 +237,10 @@ class FileService {
 
     const worksheet = workbook.addWorksheet(participants[0].title);
     const columns = [
-      { header: 'Id', key: 'id', width: 40 },
-      { header: 'Student ID', key: 'studentId', width: 40 },
+      { header: 'Full Name', key: 'fullName', width: 40 },
       { header: 'Email', key: 'email', width: 32 },
-      { header: 'Contact', key: 'contact', width: 32 },
-      { header: 'Level', key: 'level', width: 20 },
-      { header: 'Center', key: 'center', width: 20 },
-      { header: 'Join Date', key: 'createdAt', width: 20 }
+      { header: 'School', key: 'school', width: 32 },
+      { header: 'Center', key: 'center', width: 20 }
     ];
     const attributes = get(participants, '0.attributes', []);
     for (let i = 0; i < attributes.length; i += 1) {
@@ -266,13 +263,10 @@ class FileService {
         })
       );
       return {
-        id: participant.id,
-        studentId: participant.studentId,
+        fullName: participant.fullName,
         email: participant.email,
-        contact: participant.contact,
-        level: participant.levelName,
         center: participant.centerName,
-        createdAt: participant.createdAt,
+        school: participant.school,
         ...attributes
       };
     });

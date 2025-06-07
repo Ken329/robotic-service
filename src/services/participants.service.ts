@@ -77,6 +77,8 @@ class ParticipantsService {
       title: string;
       id: string;
       studentId: string;
+      fullName: string;
+      school: string;
       email: string;
       contact: string;
       levelName: string;
@@ -95,7 +97,9 @@ class ParticipantsService {
         },
         studentId: {
           id: true,
+          school: true,
           contact: true,
+          fullName: true,
           user: {
             id: true,
             email: true,
@@ -113,24 +117,23 @@ class ParticipantsService {
       }
     });
 
-    const mappedParticipants = []
+    const mappedParticipants = [];
     for (let i = 0; i < result.length; i++) {
-      const el = result[i]
-      console.log("STUDENT CENTER: " + el.studentId.user.center.id)
-      console.log("CENTER: " +  centerId)
-      console.log("MATCHED: " + el.studentId.user.center.id === centerId)
-      if(isEmpty(centerId) || el.studentId.user.center.id === centerId){
+      const el = result[i];
+      if (isEmpty(centerId) || el.studentId.user.center.id === centerId) {
         mappedParticipants.push({
-         title: el.blogId.title,
-         id: el.studentId.user.id,
-         studentId: el.studentId.id,
-         contact: el.studentId.contact,
-         email: el.studentId.user.email,
-         levelName: el.studentId.level.name,
-         centerName: el.studentId.user.center.name,
-         attributes: JSON.parse(el.attributes),
-         createdAt: el.createdAt
-       })
+          title: el.blogId.title,
+          id: el.studentId.user.id,
+          studentId: el.studentId.id,
+          school: el.studentId.school,
+          contact: el.studentId.contact,
+          email: el.studentId.user.email,
+          fullName: el.studentId.fullName,
+          levelName: el.studentId.level.name,
+          centerName: el.studentId.user.center.name,
+          attributes: JSON.parse(el.attributes),
+          createdAt: el.createdAt
+        });
       }
     }
     return mappedParticipants;

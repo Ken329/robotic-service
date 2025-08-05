@@ -240,7 +240,10 @@ class FileService {
       { header: 'Full Name', key: 'fullName', width: 40 },
       { header: 'Email', key: 'email', width: 32 },
       { header: 'School', key: 'school', width: 32 },
-      { header: 'Center', key: 'center', width: 20 }
+      { header: 'Center', key: 'center', width: 20 },
+      { header: 'Registration date', key: 'createdAt', width: 20 },
+      { header: 'Nric', key: 'nric', width: 20 },
+      { header: 'Passport', key: 'passport', width: 20 }
     ];
     const attributes = get(participants, '0.attributes', []);
     for (let i = 0; i < attributes.length; i += 1) {
@@ -267,6 +270,9 @@ class FileService {
         email: participant.email,
         center: participant.centerName,
         school: participant.school,
+        createdAt: participant.createdAt,
+        nric: participant.nric,
+        passport: participant.passport,
         ...attributes
       };
     });

@@ -79,6 +79,8 @@ class ParticipantsService {
       participantId: string;
       studentId: string;
       fullName: string;
+      nric: string;
+      passport: string;
       school: string;
       email: string;
       contact: string;
@@ -99,8 +101,10 @@ class ParticipantsService {
         },
         studentId: {
           id: true,
+          nric: true,
           school: true,
           contact: true,
+          passport: true,
           fullName: true,
           user: {
             id: true,
@@ -128,6 +132,8 @@ class ParticipantsService {
           title: el.blogId.title,
           id: el.studentId.user.id,
           studentId: el.studentId.id,
+          nric: el.studentId.nric,
+          passport: el.studentId.passport,
           school: el.studentId.school,
           contact: el.studentId.contact,
           email: el.studentId.user.email,

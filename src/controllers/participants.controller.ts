@@ -23,14 +23,14 @@ const findAll = async (req: Request, res: Response) =>
     .catch((error) => errorApiResponse(res, error.message));
 
 const findAllById = async (req: Request, res: Response) =>
-  ParticipantService.findAllById(req.params.id, get(req, 'user.role') === ROLE.CENTER ? get(req, 'user.centerId') : null)
+  ParticipantService.findAllById(
+    req.params.id,
+    get(req, 'user.role') === ROLE.CENTER ? get(req, 'user.centerId') : null
+  )
     .then((data) =>
       successApiResponse(res, 'Successfully get all participants', data)
     )
-    .catch((error) => {
-      console.log(error.message)
-      return errorApiResponse(res, error.message)
-    });
+    .catch((error) => errorApiResponse(res, error.message));
 
 const create = async (req: Request, res: Response) =>
   ParticipantService.create(
@@ -43,4 +43,11 @@ const create = async (req: Request, res: Response) =>
     )
     .catch((error) => errorApiResponse(res, error.message));
 
-export default { find, findAll, findAllById, create };
+const remove = async (req: Request, res: Response) =>
+  ParticipantService.delete(req.params.id)
+    .then(() =>
+      successApiResponse(res, 'Successfully delete participant record')
+    )
+    .catch((error) => errorApiResponse(res, error.message));
+
+export default { find, findAll, findAllById, create, remove };

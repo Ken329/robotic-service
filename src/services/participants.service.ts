@@ -76,6 +76,7 @@ class ParticipantsService {
     {
       title: string;
       id: string;
+      participantId: string;
       studentId: string;
       fullName: string;
       school: string;
@@ -92,6 +93,7 @@ class ParticipantsService {
       where,
       relations: ['blogId', 'studentId.level', 'studentId.user.center'],
       select: {
+        id: true,
         blogId: {
           title: true
         },
@@ -122,6 +124,7 @@ class ParticipantsService {
       const el = result[i];
       if (isEmpty(centerId) || el.studentId.user.center.id === centerId) {
         mappedParticipants.push({
+          participantId: el.id,
           title: el.blogId.title,
           id: el.studentId.user.id,
           studentId: el.studentId.id,
@@ -172,6 +175,11 @@ class ParticipantsService {
       ...pick(result, ['id', 'blogId', 'studentId']),
       attributes: JSON.parse(result.attributes)
     };
+  }
+
+  public async delete(id: string): Promise<Boolean> {
+    await this.participantsRepository.delete({ id });
+    return true;
   }
 }
 

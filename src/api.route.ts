@@ -369,4 +369,11 @@ route.post(
   participantsController.create
 );
 
+route.delete(
+  '/api/participants/:id',
+  authenticate(AUTH_STRATEGY.ADMIN),
+  validate(Validators.paramsId),
+  participantsController.remove
+);
+
 export default route;

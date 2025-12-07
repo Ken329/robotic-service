@@ -624,7 +624,6 @@ class UserService {
         `${moment().year()}-${process.env.EXPIRY_DATE}`,
         'YYYY-MM-DD'
       );
-      expiryDate.add(1, 'year');
 
       await this.updateStudent(id, {
         expiryDate: expiryDate.toDate(),
@@ -683,7 +682,7 @@ class UserService {
     const expiryDate = moment(
       `${moment().year()}-${process.env.EXPIRY_DATE}`,
       'YYYY-MM-DD'
-    ).add(1, 'year');
+    );
     set(payload, 'expiryDate', expiryDate.toDate());
     set(payload, 'statusChangeAt', moment().toDate());
     const userDetails = await this.updateStudent(id, payload);

@@ -582,6 +582,10 @@ class UserService {
     return true;
   }
 
+  private getNextYearExpiryDate(): Date {
+    return moment().add(1, 'year').month(10).date(15).startOf('day').toDate();
+  }
+
   public async approve(
     id: string,
     payload: StudentInfo,
@@ -620,10 +624,7 @@ class UserService {
     await this.update(id, updatedStatus);
 
     if (updatedStatus === USER_STATUS.APPROVED) {
-      const expiryDate = moment(
-        `${moment().year()}-${process.env.EXPIRY_DATE}`,
-        'YYYY-MM-DD'
-      );
+      const expiryDate = moment(this.getNextYearExpiryDate());
 
       await this.updateStudent(id, {
         expiryDate: expiryDate.toDate(),
@@ -679,10 +680,7 @@ class UserService {
 
     if (!user) throwErrorsHttp('Student not found', httpStatusCode.NOT_FOUND);
 
-    const expiryDate = moment(
-      `${moment().year()}-${process.env.EXPIRY_DATE}`,
-      'YYYY-MM-DD'
-    );
+    const expiryDate = moment(this.getNextYearExpiryDate());
     set(payload, 'expiryDate', expiryDate.toDate());
     set(payload, 'statusChangeAt', moment().toDate());
     const userDetails = await this.updateStudent(id, payload);

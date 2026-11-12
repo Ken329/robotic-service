@@ -13,6 +13,7 @@ import { Participants } from './entity/Participants.entity';
 import { StudentAchievements } from './entity/StudentAchievements.entity';
 import { updateRace1723965557693 as updateRace } from './migrations/1723965557693_updateRace';
 import { updateOthersRace1723971531137 as updateOtherRace } from './migrations/1723971531137_updateOthersRace';
+import { updateStudentExpiryDate1762916000000 as updateStudentExpiryDate } from './migrations/1762916000000_updateStudentExpiryDate';
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ const dbConnection = new DataSource({
     Participants,
     StudentAchievements
   ],
-  migrations: [updateRace, updateOtherRace],
+  migrations: [updateRace, updateOtherRace, updateStudentExpiryDate],
   migrationsTableName: '_migrations'
 });
 
